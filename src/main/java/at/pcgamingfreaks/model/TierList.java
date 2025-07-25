@@ -1,0 +1,31 @@
+package at.pcgamingfreaks.model;
+
+import at.pcgamingfreaks.model.auth.User;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
+
+@Getter
+@Setter
+@Entity(name = "tierlists")
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "user", "service", "type"})
+})
+public class TierList {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    private User user;
+
+    @Enumerated(EnumType.STRING)
+    private Service service;
+    @Enumerated(EnumType.STRING)
+    private ContentType type;
+
+    @OneToMany(fetch = FetchType.EAGER)
+    private List<Tier> tiers;
+}
