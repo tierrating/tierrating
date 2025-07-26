@@ -1,6 +1,7 @@
 package at.pcgamingfreaks.controller;
 
 import at.pcgamingfreaks.mapper.ListEntryDtoMapper;
+import at.pcgamingfreaks.model.ContentType;
 import at.pcgamingfreaks.model.anilist.AniListListEntry;
 import at.pcgamingfreaks.model.anilist.AniListPage;
 import at.pcgamingfreaks.model.auth.AniListConnection;
@@ -43,7 +44,7 @@ public class AniListController {
     private String clientSecret;
 
     @GetMapping("{username}/{type}")
-    public List<ListEntryDTO> getData(@PathVariable String username, @PathVariable String type) {
+    public List<ListEntryDTO> getData(@PathVariable String username, @PathVariable ContentType type) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
         String query = """
                 query ($userId: Int, $type: MediaType, $status: MediaListStatus, $page: Int, $perPage: Int) {
@@ -81,7 +82,7 @@ public class AniListController {
             page = createGraphQlClient()
                     .document(query)
                     .variable("userId", user.getAnilistConnection().getAnilistId())
-                    .variable("type", type.toUpperCase())
+                    .variable("type", type.name())
                     .variable("status", "COMPLETED")
                     .variable("page", currentPage++)
                     .variable("perPage", 50)

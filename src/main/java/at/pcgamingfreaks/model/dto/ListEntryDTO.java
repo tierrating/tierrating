@@ -11,5 +11,4 @@ public class ListEntryDTO {
     private String cover;
 
     private int score;
-    private String tier;
 }
