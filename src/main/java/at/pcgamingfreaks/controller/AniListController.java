@@ -92,7 +92,10 @@ public class AniListController {
         } while (page.getPageInfo().isHasNextPage());
         log.info("Getting data in {}ms", System.currentTimeMillis() - timerStart);
 
-        return result.stream().map(ListEntryDtoMapper::map).toList();
+        return result.stream()
+                .map(ListEntryDtoMapper::map)
+                .sorted(Comparator.comparing(ListEntryDTO::getScore).reversed())
+                .toList();
     }
 
     private HttpGraphQlClient createGraphQlClient() {

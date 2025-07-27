@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,7 +35,10 @@ public class TiersController {
         }
         List<Tier> tiers = tierListsRepository.findByUserAndServiceAndType(user.get(), service, type)
                 .map(TierList::getTiers)
-                .orElse(getDefaultTiers());
+                .orElse(getDefaultTiers())
+                .stream()
+                .sorted(Comparator.comparing(Tier::getScore).reversed())
+                .toList();
         return ResponseEntity.ok(tiers);
     }
 
