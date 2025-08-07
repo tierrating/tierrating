@@ -10,10 +10,7 @@ import at.pcgamingfreaks.model.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -26,7 +23,7 @@ public class TiersController {
     private final TierListsRepository tierListsRepository;
 
     @GetMapping("{username}/{service}/{type}")
-    private ResponseEntity<List<Tier>> getTierlist(@PathVariable String username, @PathVariable Service service, @PathVariable ContentType type) throws InterruptedException {
+    public ResponseEntity<List<Tier>> getTierlist(@PathVariable String username, @PathVariable Service service, @PathVariable ContentType type) {
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isEmpty() || !hasUserConnection(user.get(), service)) {
             return ResponseEntity.notFound().build();
@@ -38,6 +35,30 @@ public class TiersController {
                 .toList()
         )).orElseGet(() -> ResponseEntity.ok(new ArrayList<>()));
 
+    }
+
+    @PostMapping("{username}/{service}/{type}")
+    public ResponseEntity<?> setTierlist(@PathVariable String username, @PathVariable Service service,
+                             @PathVariable ContentType type, @RequestBody List<Tier> changedTierlist) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isEmpty() || !hasUserConnection(user.get(), service)) {
+            return ResponseEntity.notFound().build();
+        }
+        Optional<TierList> existingTierlist = tierListsRepository.findByUserAndServiceAndType(user.get(), service, type);
+
+        if (existingTierlist.isPresent()) {
+            existingTierlist.get().setTiers(changedTierlist);
+            tierListsRepository.save(existingTierlist.get());
+        } else {
+            TierList tierlist = new TierList();
+            tierlist.setUser(user.get());
+            tierlist.setService(service);
+            tierlist.setType(type);
+            tierlist.setTiers(changedTierlist);
+            tierListsRepository.save(tierlist);
+        }
+
+        return ResponseEntity.ok().build();
     }
 
     private boolean hasUserConnection(User user, Service service) {
