@@ -9,7 +9,7 @@ import at.pcgamingfreaks.model.auth.User;
 import at.pcgamingfreaks.model.dto.*;
 import at.pcgamingfreaks.model.repo.AniListConnectionRepository;
 import at.pcgamingfreaks.model.repo.UserRepository;
-import at.pcgamingfreaks.model.util.JwtObject;
+import at.pcgamingfreaks.model.util.JwtPayload;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -112,7 +112,7 @@ public class AniListController {
         requestBody.put("grant_type", "authorization_code");
         requestBody.put("client_id", clientKey);
         requestBody.put("client_secret", clientSecret);
-        requestBody.put("redirect_uri", "http://localhost:3001/auth/anilist");
+        requestBody.put("redirect_uri", "http://localhost:3000/auth/anilist");
         requestBody.put("code", request.getCode());
 
         RestTemplate restTemplate = new RestTemplate();
@@ -157,7 +157,8 @@ public class AniListController {
     }
 
     private long extractUserIdFrom(String jwt) throws IOException {
-        Base64.Decoder decoder = Base64.getDecoder();
-        return objectMapper.readValue(decoder.decode(jwt), JwtObject.class).getPayload().getUserId();
+        Base64.Decoder decoder = Base64.getUrlDecoder();
+        String[] chunks = jwt.split("\\.");
+        return objectMapper.readValue(decoder.decode(chunks[1]), JwtPayload.class).getUserId();
     }
 }
