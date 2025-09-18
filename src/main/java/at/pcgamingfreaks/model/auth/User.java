@@ -1,5 +1,6 @@
 package at.pcgamingfreaks.model.auth;
 
+import at.pcgamingfreaks.model.TierList;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -42,6 +43,9 @@ public class User implements UserDetails {
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private AniListConnection anilistConnection;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<TierList> tierlists;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

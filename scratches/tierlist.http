@@ -1,0 +1,6 @@
+### GET tiers for anilist anime
+GET http://localhost:8080/tiers/RatzzFatzz/anilist/anime
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJSYXR6ekZhdHp6IiwiaWF0IjoxNzUzNDQ3NDQyLCJleHAiOjE3NTM0NTEwNDJ9.DLBZuM1aB541tuL-wWMo4vlltLwfoDbAxDFT2IajUtI
+Content-Type: application/json
+
+###

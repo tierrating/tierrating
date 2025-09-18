@@ -1,6 +1,7 @@
 package at.pcgamingfreaks.controller;
 
 import at.pcgamingfreaks.mapper.ListEntryDtoMapper;
+import at.pcgamingfreaks.model.ContentType;
 import at.pcgamingfreaks.model.anilist.AniListListEntry;
 import at.pcgamingfreaks.model.anilist.AniListPage;
 import at.pcgamingfreaks.model.auth.AniListConnection;
@@ -8,7 +9,7 @@ import at.pcgamingfreaks.model.auth.User;
 import at.pcgamingfreaks.model.dto.*;
 import at.pcgamingfreaks.model.repo.AniListConnectionRepository;
 import at.pcgamingfreaks.model.repo.UserRepository;
-import at.pcgamingfreaks.model.util.JwtObject;
+import at.pcgamingfreaks.model.util.JwtPayload;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +44,7 @@ public class AniListController {
     private String clientSecret;
 
     @GetMapping("{username}/{type}")
-    public List<ListEntryDTO> getData(@PathVariable String username, @PathVariable String type) {
+    public List<ListEntryDTO> getData(@PathVariable String username, @PathVariable ContentType type) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
         String query = """
                 query ($userId: Int, $type: MediaType, $status: MediaListStatus, $page: Int, $perPage: Int) {
@@ -81,7 +82,7 @@ public class AniListController {
             page = createGraphQlClient()
                     .document(query)
                     .variable("userId", user.getAnilistConnection().getAnilistId())
-                    .variable("type", type.toUpperCase())
+                    .variable("type", type.name())
                     .variable("status", "COMPLETED")
                     .variable("page", currentPage++)
                     .variable("perPage", 50)
@@ -91,7 +92,10 @@ public class AniListController {
         } while (page.getPageInfo().isHasNextPage());
         log.info("Getting data in {}ms", System.currentTimeMillis() - timerStart);
 
-        return result.stream().map(ListEntryDtoMapper::map).toList();
+        return result.stream()
+                .map(ListEntryDtoMapper::map)
+                .sorted(Comparator.comparing(ListEntryDTO::getScore).reversed())
+                .toList();
     }
 
     private HttpGraphQlClient createGraphQlClient() {
@@ -108,7 +112,7 @@ public class AniListController {
         requestBody.put("grant_type", "authorization_code");
         requestBody.put("client_id", clientKey);
         requestBody.put("client_secret", clientSecret);
-        requestBody.put("redirect_uri", "http://localhost:3001/auth/anilist");
+        requestBody.put("redirect_uri", "http://localhost:3000/auth/anilist");
         requestBody.put("code", request.getCode());
 
         RestTemplate restTemplate = new RestTemplate();
@@ -153,7 +157,8 @@ public class AniListController {
     }
 
     private long extractUserIdFrom(String jwt) throws IOException {
-        Base64.Decoder decoder = Base64.getDecoder();
-        return objectMapper.readValue(decoder.decode(jwt), JwtObject.class).getPayload().getUserId();
+        Base64.Decoder decoder = Base64.getUrlDecoder();
+        String[] chunks = jwt.split("\\.");
+        return objectMapper.readValue(decoder.decode(chunks[1]), JwtPayload.class).getUserId();
     }
 }
