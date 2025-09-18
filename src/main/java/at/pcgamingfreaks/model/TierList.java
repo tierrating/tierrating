@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @Entity(name = "tierlists")
 @Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "user", "service", "type"})
+        @UniqueConstraint(columnNames = { "user.id", "service", "type"})
 })
 public class TierList {
     @Id
@@ -26,6 +26,6 @@ public class TierList {
     @Enumerated(EnumType.STRING)
     private ContentType type;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Tier> tiers;
 }

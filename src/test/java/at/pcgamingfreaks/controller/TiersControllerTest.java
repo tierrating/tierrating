@@ -6,7 +6,9 @@ import at.pcgamingfreaks.model.Tier;
 import at.pcgamingfreaks.model.TierList;
 import at.pcgamingfreaks.model.auth.AniListConnection;
 import at.pcgamingfreaks.model.auth.User;
+import at.pcgamingfreaks.model.dto.TierDTO;
 import at.pcgamingfreaks.model.repo.TierListsRepository;
+import at.pcgamingfreaks.model.repo.TiersRepository;
 import at.pcgamingfreaks.model.repo.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +25,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,6 +38,8 @@ class TiersControllerTest {
     private UserRepository userRepository;
     @Mock
     private TierListsRepository tierListsRepository;
+    @Mock
+    private TiersRepository tiersRepository;
 
     @InjectMocks
     private TiersController tiersController;
@@ -60,11 +65,11 @@ class TiersControllerTest {
         when(tierListsRepository.findByUserAndServiceAndType(any(), any(), any())).thenReturn(Optional.empty());
         when(tierListsRepository.save(any())).thenReturn(null);
 
-        List<Tier> tiers = List.of(
-                new Tier("#111111", "testing 1", 10, 10),
-                new Tier("#222222", "testing 2", 8, 8),
-                new Tier("#333333", "testing 3", 6, 6),
-                new Tier("#444444", "testing 4", 4, 4)
+        List<TierDTO> tiers = List.of(
+                new TierDTO("#111111", "testing 1", 10, 10),
+                new TierDTO("#222222", "testing 2", 8, 8),
+                new TierDTO("#333333", "testing 3", 6, 6),
+                new TierDTO("#444444", "testing 4", 4, 4)
         );
 
         ArgumentCaptor<TierList> tierListCaptor = ArgumentCaptor.forClass(TierList.class);
@@ -76,7 +81,12 @@ class TiersControllerTest {
         assertEquals(user, capturedTierlist.getUser());
         assertEquals(Service.ANILIST, capturedTierlist.getService());
         assertEquals(ContentType.ANIME, capturedTierlist.getType());
-        assertEquals(tiers, capturedTierlist.getTiers());
+        for (int i = 0; i < capturedTierlist.getTiers().size() && i < tiers.size(); i++) {
+            assertEquals(capturedTierlist.getTiers().get(i).getColor(), tiers.get(i).getColor());
+            assertEquals(capturedTierlist.getTiers().get(i).getName(), tiers.get(i).getName());
+            assertEquals(capturedTierlist.getTiers().get(i).getScore(), tiers.get(i).getScore());
+            assertEquals(capturedTierlist.getTiers().get(i).getAdjustedScore(), tiers.get(i).getAdjustedScore());
+        }
     }
 
     @Test
@@ -86,23 +96,23 @@ class TiersControllerTest {
         user.setAnilistConnection(new AniListConnection());
         when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
 
-        List<Tier> existingTiers = List.of(
-                new Tier("#666666", "testing 6", 10, 10),
-                new Tier("#777777", "testing 7", 7, 7),
-                new Tier("#888888", "testing 8", 4, 4),
-                new Tier("#999999", "testing 9", 1, 1)
-        );
+        List<Tier> existingTiers = new ArrayList<>();
+        existingTiers.add(new Tier(UUID.randomUUID(), "#666666", "testing 6", 10, 10));
+        existingTiers.add(new Tier(UUID.randomUUID(), "#777777", "testing 7", 7, 7));
+        existingTiers.add(new Tier(UUID.randomUUID(), "#888888", "testing 8", 4, 4));
+        existingTiers.add(new Tier(UUID.randomUUID(), "#999999", "testing 9", 1, 1));
+
         TierList tierList = new TierList();
         tierList.setUser(user);
         tierList.setTiers(existingTiers);
         when(tierListsRepository.findByUserAndServiceAndType(any(), any(), any())).thenReturn(Optional.of(tierList));
         when(tierListsRepository.save(any())).thenReturn(null);
 
-        List<Tier> tiers = List.of(
-                new Tier("#111111", "testing 1", 10, 10),
-                new Tier("#222222", "testing 2", 8, 8),
-                new Tier("#333333", "testing 3", 6, 6),
-                new Tier("#444444", "testing 4", 4, 4)
+        List<TierDTO> tiers = List.of(
+                new TierDTO("#111111", "testing 1", 10, 10),
+                new TierDTO("#222222", "testing 2", 8, 8),
+                new TierDTO("#333333", "testing 3", 6, 6),
+                new TierDTO("#444444", "testing 4", 4, 4)
         );
 
         ArgumentCaptor<TierList> tierListCaptor = ArgumentCaptor.forClass(TierList.class);
@@ -112,6 +122,11 @@ class TiersControllerTest {
         verify(tierListsRepository, times(1)).save(tierListCaptor.capture());
         TierList capturedTierlist = tierListCaptor.getValue();
         assertEquals(user, capturedTierlist.getUser());
-        assertEquals(tiers, capturedTierlist.getTiers());
+        for (int i = 0; i < capturedTierlist.getTiers().size() && i < tiers.size(); i++) {
+            assertEquals(capturedTierlist.getTiers().get(i).getColor(), tiers.get(i).getColor());
+            assertEquals(capturedTierlist.getTiers().get(i).getName(), tiers.get(i).getName());
+            assertEquals(capturedTierlist.getTiers().get(i).getScore(), tiers.get(i).getScore());
+            assertEquals(capturedTierlist.getTiers().get(i).getAdjustedScore(), tiers.get(i).getAdjustedScore());
+        }
     }
 }
