@@ -1,7 +1,7 @@
 package at.pcgamingfreaks.controller;
 
 import at.pcgamingfreaks.model.ContentType;
-import at.pcgamingfreaks.model.Service;
+import at.pcgamingfreaks.model.ThirdPartyService;
 import at.pcgamingfreaks.model.Tier;
 import at.pcgamingfreaks.model.TierList;
 import at.pcgamingfreaks.model.auth.AniListConnection;
@@ -10,7 +10,6 @@ import at.pcgamingfreaks.model.dto.TierDTO;
 import at.pcgamingfreaks.model.repo.TierListsRepository;
 import at.pcgamingfreaks.model.repo.TiersRepository;
 import at.pcgamingfreaks.model.repo.UserRepository;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -48,7 +47,7 @@ class TiersControllerTest {
     @MethodSource("notFound")
     public void setTierListNotFound(Optional<User> user) {
         when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
-        ResponseEntity<?> result = tiersController.setTierlist("testing", Service.ANILIST, ContentType.ANIME, new ArrayList<>());
+        ResponseEntity<?> result = tiersController.setTierlist("testing", ThirdPartyService.ANILIST, ContentType.ANIME, new ArrayList<>());
         assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode().value());
     }
 
@@ -114,7 +113,7 @@ class TiersControllerTest {
         ArgumentCaptor<TierList> tierListCaptor = ArgumentCaptor.forClass(TierList.class);
         ArgumentCaptor<List<Tier>> tiersCaptor = ArgumentCaptor.forClass(List.class);
 
-        tiersController.setTierlist("test", Service.ANILIST, ContentType.ANIME, changedTiers);
+        tiersController.setTierlist("test", ThirdPartyService.ANILIST, ContentType.ANIME, changedTiers);
 
         verify(tierListsRepository, times(1)).save(tierListCaptor.capture());
 

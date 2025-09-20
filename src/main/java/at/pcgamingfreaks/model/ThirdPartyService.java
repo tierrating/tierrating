@@ -1,6 +1,6 @@
 package at.pcgamingfreaks.model;
 
-public enum Service {
+public enum ThirdPartyService {
     ANILIST,
     TRAKT
 }

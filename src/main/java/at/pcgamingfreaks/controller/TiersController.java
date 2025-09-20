@@ -2,7 +2,7 @@ package at.pcgamingfreaks.controller;
 
 import at.pcgamingfreaks.mapper.TierDtoMapper;
 import at.pcgamingfreaks.model.ContentType;
-import at.pcgamingfreaks.model.Service;
+import at.pcgamingfreaks.model.ThirdPartyService;
 import at.pcgamingfreaks.model.Tier;
 import at.pcgamingfreaks.model.TierList;
 import at.pcgamingfreaks.model.auth.User;
@@ -29,7 +29,7 @@ public class TiersController {
     private final TiersRepository tiersRepository;
 
     @GetMapping("{username}/{service}/{type}")
-    public ResponseEntity<List<TierDTO>> getTierlist(@PathVariable String username, @PathVariable Service service, @PathVariable ContentType type) {
+    public ResponseEntity<List<TierDTO>> getTierlist(@PathVariable String username, @PathVariable ThirdPartyService service, @PathVariable ContentType type) {
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isEmpty() || !hasUserConnection(user.get(), service)) {
             return ResponseEntity.notFound().build();
@@ -46,7 +46,7 @@ public class TiersController {
     }
 
     @PostMapping("{username}/{service}/{type}")
-    public ResponseEntity<?> setTierlist(@PathVariable String username, @PathVariable Service service,
+    public ResponseEntity<?> setTierlist(@PathVariable String username, @PathVariable ThirdPartyService service,
                              @PathVariable ContentType type, @RequestBody List<TierDTO> changedTierlist) {
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isEmpty() || !hasUserConnection(user.get(), service)) {
@@ -110,7 +110,7 @@ public class TiersController {
         return ResponseEntity.ok().build();
     }
 
-    private boolean hasUserConnection(User user, Service service) {
+    private boolean hasUserConnection(User user, ThirdPartyService service) {
         return switch (service) {
             case ANILIST -> user.getAnilistConnection() != null;
             default ->  false;

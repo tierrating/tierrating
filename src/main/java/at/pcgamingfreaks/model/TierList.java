@@ -22,7 +22,7 @@ public class TierList {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    private Service service;
+    private ThirdPartyService service;
     @Enumerated(EnumType.STRING)
     private ContentType type;
 
