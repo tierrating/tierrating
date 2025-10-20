@@ -19,6 +19,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static at.pcgamingfreaks.model.ThirdPartyService.hasUserConnection;
+
 @Slf4j
 @RestController
 @RequestMapping("tiers")
@@ -110,11 +112,5 @@ public class TiersController {
         return ResponseEntity.ok().build();
     }
 
-    private boolean hasUserConnection(User user, ThirdPartyService service) {
-        return switch (service) {
-            case ANILIST -> user.getAnilistConnection() != null;
-            default ->  false;
-        };
 
-    }
 }

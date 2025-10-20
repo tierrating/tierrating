@@ -1,5 +1,5 @@
-GET http://localhost:8080/anilist/ratzzfatzz/manga
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc0OTMzNTE5OSwiZXhwIjoxNzQ5MzM4Nzk5fQ.EnNiHmFKOmLWVimeXj0bFLTf0Ll9TXmVc8NnAKwCnhY
+GET http://localhost:8080/anilist/RatzzFatzz/anime
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJSYXR6ekZhdHp6IiwiaWF0IjoxNzUzNjUyNTk1LCJleHAiOjE3NTM2NTYxOTV9.rwPJLj5tuks85VYYP1awv8zXQgqrePaDSim44Lfd35w
 
 ###
 
@@ -25,7 +25,7 @@ Accept: application/json
   "grant_type": "authorization_code",
   "client_id": "<client_code>",
   "client_secret": "<client_secret>",
-  "redirect_uri": "http://localhost:3001/auth/anilist",
+  "redirect_uri": "http://localhost:3000/auth/anilist",
   "code": "<code>>"
 }
 
@@ -80,4 +80,16 @@ query ExampleQuery($userName: String, $type: MediaType, $status: MediaListStatus
   "type": "ANIME",
   "page": 1,
   "perPage": 500
+}
+
+###
+POST localhost:8080/data/update
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJSYXR6ekZhdHp6IiwiaWF0IjoxNzYwOTk2MzQzLCJleHAiOjE3NjA5OTk5NDN9.ZLH8OpUJvvP9HOJ-KG2o6jHnc-JQhyLOn8GgU-stdKU
+Content-Type: application/json
+
+{
+  "id": "11111",
+  "rating": "10",
+  "username": "RatzzFatzz",
+  "service": "ANILIST"
 }
