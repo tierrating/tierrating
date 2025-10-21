@@ -33,7 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
-            log.info("JWT Authentication Failed");
+            log.info("JWT Authentication Failed: Header missing");
             return;
         }
 
@@ -58,8 +58,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
 
-            log.info("JWT Authentication Success for {}", username);
             filterChain.doFilter(request, response);
+            log.info("JWT Authentication Success for {}", username);
         } catch (Exception exception) {
             handlerExceptionResolver.resolveException(request, response, null, exception);
         }
