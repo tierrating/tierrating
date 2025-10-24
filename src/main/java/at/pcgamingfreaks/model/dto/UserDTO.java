@@ -11,6 +11,6 @@ public class UserDTO {
     private String username;
     private String bio;
 
-    private boolean isAniListConnected;
+    private boolean isAnilistConnected;
     private boolean isTraktConnected;
 }

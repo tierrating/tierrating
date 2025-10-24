@@ -7,11 +7,11 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class UpdateRatingResponseDTO {
+public class UpdateScoreResponseDTO {
     private boolean error;
     private String message;
 
-    public static UpdateRatingResponseDTO success() {
-        return new UpdateRatingResponseDTO(false, "");
+    public static UpdateScoreResponseDTO success() {
+        return new UpdateScoreResponseDTO(false, "");
     }
 }

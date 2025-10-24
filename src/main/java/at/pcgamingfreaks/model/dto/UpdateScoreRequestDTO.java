@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class UpdateRatingRequestDTO {
+public class UpdateScoreRequestDTO {
     private String username;
     private ThirdPartyService service;
 

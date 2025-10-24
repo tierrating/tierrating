@@ -2,10 +2,10 @@ package at.pcgamingfreaks.controller;
 
 import at.pcgamingfreaks.model.ContentType;
 import at.pcgamingfreaks.model.ThirdPartyService;
-import at.pcgamingfreaks.model.dto.UpdateRatingRequestDTO;
+import at.pcgamingfreaks.model.dto.UpdateScoreRequestDTO;
 import at.pcgamingfreaks.model.auth.User;
 import at.pcgamingfreaks.model.dto.ListEntryDTO;
-import at.pcgamingfreaks.model.dto.UpdateRatingResponseDTO;
+import at.pcgamingfreaks.model.dto.UpdateScoreResponseDTO;
 import at.pcgamingfreaks.model.repo.UserRepository;
 import at.pcgamingfreaks.service.dataprovider.DataProviderFactory;
 import at.pcgamingfreaks.service.dataprovider.DataProviderService;
@@ -49,7 +49,7 @@ public class DataController {
      * @return
      */
     @PostMapping("update")
-    public ResponseEntity<UpdateRatingResponseDTO> updateData(@RequestBody UpdateRatingRequestDTO request) {
+    public ResponseEntity<UpdateScoreResponseDTO> updateData(@RequestBody UpdateScoreRequestDTO request) {
         Optional<User> user = userRepository.findByUsername(request.getUsername());
         if (user.isEmpty() || !hasUserConnection(user.get(), request.getService())) {
             return ResponseEntity.notFound().build();
@@ -60,7 +60,7 @@ public class DataController {
 
         try {
             dataUpdateFactory.getProvider(request.getService()).updateData(request.getId(), request.getScore(), user.get());
-            return ResponseEntity.ok(UpdateRatingResponseDTO.success());
+            return ResponseEntity.ok(UpdateScoreResponseDTO.success());
         }  catch (Exception e) {
             log.error("Failed updating score for {}", user.get().getUsername(), e);
             return ResponseEntity.badRequest().build();
