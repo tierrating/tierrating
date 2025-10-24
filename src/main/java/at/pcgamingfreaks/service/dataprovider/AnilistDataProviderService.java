@@ -42,7 +42,7 @@ public class AnilistDataProviderService implements DataProviderService {
                             perPage
                         }
                         mediaList(userId: $userId, type: $type, status: $status) {
-                            score(format: POINT_10)
+                            score(format: POINT_10_DECIMAL)
                             media {
                                 id
                                 title {
