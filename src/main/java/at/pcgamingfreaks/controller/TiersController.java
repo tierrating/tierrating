@@ -13,6 +13,7 @@ import at.pcgamingfreaks.model.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -48,6 +49,7 @@ public class TiersController {
     }
 
     @PostMapping("{username}/{service}/{type}")
+    @PreAuthorize("authentication.principal.username == #username")
     public ResponseEntity<?> setTierlist(@PathVariable String username, @PathVariable ThirdPartyService service,
                              @PathVariable ContentType type, @RequestBody List<TierDTO> changedTierlist) {
         Optional<User> user = userRepository.findByUsername(username);

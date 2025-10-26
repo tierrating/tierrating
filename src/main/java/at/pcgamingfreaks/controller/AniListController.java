@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -39,6 +40,7 @@ public class AniListController {
     private String clientSecret;
 
     @PostMapping("auth/{username}")
+    @PreAuthorize("authentication.principal.username == #username")
     public ResponseEntity<ThirdPartyAuthResponseDTO> auth(
             @PathVariable String username,
             @RequestBody ThirdPartyAuthRequestDTO request

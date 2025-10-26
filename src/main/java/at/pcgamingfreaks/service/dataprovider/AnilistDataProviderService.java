@@ -19,12 +19,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static at.pcgamingfreaks.config.GlobalProperties.ANILIST_API_URL;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AnilistDataProviderService implements DataProviderService {
     private final UserRepository userRepository;
-    private final String ANILIST_API_URL = "https://graphql.anilist.co";
 
     public ThirdPartyService getService() {
         return ThirdPartyService.ANILIST;

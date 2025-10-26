@@ -13,6 +13,7 @@ import at.pcgamingfreaks.service.dataupdate.DataUpdateFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,14 +50,12 @@ public class DataController {
      * @return
      */
     @PostMapping("update")
+    @PreAuthorize("authentication.principal.username == #request.username")
     public ResponseEntity<UpdateScoreResponseDTO> updateData(@RequestBody UpdateScoreRequestDTO request) {
         Optional<User> user = userRepository.findByUsername(request.getUsername());
         if (user.isEmpty() || !hasUserConnection(user.get(), request.getService())) {
             return ResponseEntity.notFound().build();
         }
-
-        // TODO: verify requested user matches user of token
-        // TODO: check validity of access token & refresh if necessary
 
         try {
             dataUpdateFactory.getProvider(request.getService()).updateData(request.getId(), request.getScore(), user.get());
