@@ -23,7 +23,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO request) {
-        log.debug("Login request from {}", request.getUsername());
+        log.info("Login request from {}", request.getUsername());
         try {
             return ResponseEntity.ok(authService.authenticate(request.getUsername(), request.getPassword()));
         } catch (Exception ignored) {
@@ -33,7 +33,7 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<SignupResponseDTO> signup(@RequestBody SignupRequestDTO request) {
-        log.debug("Signup request from {}", request.getUsername());
+        log.info("Signup request from {}", request.getUsername());
         return ResponseEntity.ok(authService.signup(request));
     }
 }

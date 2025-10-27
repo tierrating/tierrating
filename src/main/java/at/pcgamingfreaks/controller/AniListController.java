@@ -47,7 +47,7 @@ public class AniListController {
             @PathVariable String username,
             @RequestBody ThirdPartyAuthRequestDTO request
     ) {
-        log.debug("Auth request for {}", username);
+        log.info("Auth request for {}", username);
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("grant_type", "authorization_code");
         requestBody.put("client_id", clientKey);

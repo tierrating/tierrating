@@ -78,7 +78,8 @@ public class AnilistDataProviderService implements DataProviderService {
                     .toEntity(AniListPage.class);
             result.addAll(page.getMediaList());
         } while (page.getPageInfo().isHasNextPage());
-        log.info("Getting data in {}ms", System.currentTimeMillis() - timerStart);
+        long requestDuration = System.currentTimeMillis() - timerStart;
+        log.info("Retrieving data from Anilist for {} took {}{}", username,  requestDuration > 1000 ? requestDuration / 1000 : requestDuration, requestDuration > 1000 ? "s" : "ms");
 
         return result.stream()
                 .map(ListEntryDtoMapper::map)
