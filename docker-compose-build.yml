@@ -1,0 +1,36 @@
+name: tierrating
+services:
+
+  server:
+    build: .
+    restart: unless-stopped
+    ports:
+      - 8080
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: tierrating
+      DB_PASSWORD: testingPW
+      ANILIST_CLIENT_KEY:
+      ANILIST_CLIENT_SECRET:
+
+  ui:
+    build: ../tierrating-ui
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    environment:
+      API_URL: 'http://server:8080'
+
+  db:
+    image: postgres
+    restart: unless-stopped
+    ports:
+      - 5432
+    volumes:
+      - ./temp-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: tierrating
+      POSTGRES_PASSWORD: testingPW

@@ -22,5 +22,5 @@ security:
 services:
   anilist:
     client:
-      key:
-      secret:
+      key: ${ANILIST_CLIENT_KEY}
+      secret: ${ANILIST_CLIENT_SECRET}
