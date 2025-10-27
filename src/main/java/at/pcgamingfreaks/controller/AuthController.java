@@ -7,6 +7,7 @@ import at.pcgamingfreaks.model.dto.SignupResponseDTO;
 import at.pcgamingfreaks.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +24,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO request) {
         log.info("Login request from {}", request.getUsername());
-        return ResponseEntity.ok(authService.authenticate(request.getUsername(), request.getPassword()));
+        try {
+            return ResponseEntity.ok(authService.authenticate(request.getUsername(), request.getPassword()));
+        } catch (Exception ignored) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @PostMapping("/signup")

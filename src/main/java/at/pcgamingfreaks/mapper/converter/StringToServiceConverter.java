@@ -1,11 +1,11 @@
 package at.pcgamingfreaks.mapper.converter;
 
-import at.pcgamingfreaks.model.Service;
+import at.pcgamingfreaks.model.ThirdPartyService;
 import org.springframework.core.convert.converter.Converter;
 
-public class StringToServiceConverter implements Converter<String, Service> {
+public class StringToServiceConverter implements Converter<String, ThirdPartyService> {
     @Override
-    public Service convert(String source) {
-        return Service.valueOf(source.toUpperCase());
+    public ThirdPartyService convert(String source) {
+        return ThirdPartyService.valueOf(source.toUpperCase());
     }
 }

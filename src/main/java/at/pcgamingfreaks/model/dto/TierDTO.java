@@ -18,6 +18,11 @@ public class TierDTO {
     private double adjustedScore;
 
     public TierDTO(String color, String name, double score, double adjustedScore) {
+        this(null,  color, name, score, adjustedScore);
+    }
+
+    public TierDTO(UUID id, String color, String name, double score, double adjustedScore) {
+        this.id = id;
         this.color = color;
         this.name = name;
         this.score = score;

@@ -10,5 +10,5 @@ public class ListEntryDTO {
     private String title;
     private String cover;
 
-    private int score;
+    private float score;
 }

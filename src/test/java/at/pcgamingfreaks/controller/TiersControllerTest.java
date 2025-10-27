@@ -1,7 +1,7 @@
 package at.pcgamingfreaks.controller;
 
 import at.pcgamingfreaks.model.ContentType;
-import at.pcgamingfreaks.model.Service;
+import at.pcgamingfreaks.model.ThirdPartyService;
 import at.pcgamingfreaks.model.Tier;
 import at.pcgamingfreaks.model.TierList;
 import at.pcgamingfreaks.model.auth.AniListConnection;
@@ -10,7 +10,6 @@ import at.pcgamingfreaks.model.dto.TierDTO;
 import at.pcgamingfreaks.model.repo.TierListsRepository;
 import at.pcgamingfreaks.model.repo.TiersRepository;
 import at.pcgamingfreaks.model.repo.UserRepository;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -48,7 +47,7 @@ class TiersControllerTest {
     @MethodSource("notFound")
     public void setTierListNotFound(Optional<User> user) {
         when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
-        ResponseEntity<?> result = tiersController.setTierlist("testing", Service.ANILIST, ContentType.ANIME, new ArrayList<>());
+        ResponseEntity<?> result = tiersController.setTierlist("testing", ThirdPartyService.ANILIST, ContentType.ANIME, new ArrayList<>());
         assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode().value());
     }
 
@@ -56,77 +55,88 @@ class TiersControllerTest {
         return Stream.of(Arguments.of(Optional.empty()), Arguments.of(Optional.of(new User())));
     }
 
-    @Test
-    public void setTierListEmpty() {
-        User user = new User();
-        user.setUsername("test");
-        user.setAnilistConnection(new AniListConnection());
-        when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
-        when(tierListsRepository.findByUserAndServiceAndType(any(), any(), any())).thenReturn(Optional.empty());
-        when(tierListsRepository.save(any())).thenReturn(null);
-
-        List<TierDTO> tiers = List.of(
-                new TierDTO("#111111", "testing 1", 10, 10),
-                new TierDTO("#222222", "testing 2", 8, 8),
-                new TierDTO("#333333", "testing 3", 6, 6),
-                new TierDTO("#444444", "testing 4", 4, 4)
+    private static Stream<Arguments> settingTierlist() {
+        return Stream.of(
+                Arguments.of(
+                        List.of(),
+                        List.of(new TierDTO(UUID.randomUUID(), "#111111", "testing 1", 10, 10),
+                                new TierDTO(UUID.randomUUID(), "#222222", "testing 2", 8, 8)),
+                        List.of(new Tier(UUID.randomUUID(), "#111111", "testing 1", 10, 10),
+                                new Tier(UUID.randomUUID(), "#222222", "testing 2", 8, 8)),
+                        List.of()
+                ),
+                Arguments.of(
+                        List.of(new Tier(UUID.randomUUID(), "#666666", "testing 6", 10, 10),
+                                new Tier(UUID.randomUUID(), "#777777", "testing 7", 7, 7),
+                                new Tier(UUID.randomUUID(), "#888888", "testing 8", 4, 4),
+                                new Tier(UUID.randomUUID(), "#999999", "testing 9", 1, 1)),
+                        List.of(new TierDTO(UUID.randomUUID(), "#111111", "testing 1", 10, 10),
+                                new TierDTO(UUID.randomUUID(), "#222222", "testing 2", 8, 8),
+                                new TierDTO(UUID.randomUUID(), "#333333", "testing 3", 6, 6),
+                                new TierDTO(UUID.randomUUID(), "#444444", "testing 4", 4, 4)),
+                        List.of(new Tier(UUID.randomUUID(), "#111111", "testing 1", 10, 10),
+                                new Tier(UUID.randomUUID(), "#222222", "testing 2", 8, 8),
+                                new Tier(UUID.randomUUID(), "#333333", "testing 3", 6, 6),
+                                new Tier(UUID.randomUUID(), "#444444", "testing 4", 4, 4)),
+                        List.of(new Tier(UUID.randomUUID(), "#666666", "testing 6", 10, 10),
+                                new Tier(UUID.randomUUID(), "#777777", "testing 7", 7, 7),
+                                new Tier(UUID.randomUUID(), "#888888", "testing 8", 4, 4),
+                                new Tier(UUID.randomUUID(), "#999999", "testing 9", 1, 1))
+                ),
+                Arguments.of(
+                        List.of(new Tier(UUID.fromString("da2e6e6e-9fc8-4201-bb99-2d0416c939d9"), "#666666", "testing 6", 10, 10),
+                                new Tier(UUID.fromString("ca7d3900-3eea-4619-89b2-a2fec2f99a11"), "#777777", "testing 7", 7, 7)),
+                        List.of(new TierDTO(UUID.fromString("da2e6e6e-9fc8-4201-bb99-2d0416c939d9"), "#666789", "testing 6789", 10, 10),
+                                new TierDTO(UUID.fromString("6bf9f692-07bb-485e-9d73-1ee6fe364fba"), "#888888", "testing 8", 8, 8)),
+                        List.of(new Tier(UUID.fromString("da2e6e6e-9fc8-4201-bb99-2d0416c939d9"), "#666789", "testing 6789", 10, 10),
+                                new Tier(UUID.fromString("6bf9f692-07bb-485e-9d73-1ee6fe364fba"), "#888888", "testing 8", 8, 8)),
+                        List.of(new Tier(UUID.fromString("ca7d3900-3eea-4619-89b2-a2fec2f99a11"), "#777777", "testing 7", 7, 7))
+                )
         );
-
-        ArgumentCaptor<TierList> tierListCaptor = ArgumentCaptor.forClass(TierList.class);
-
-        tiersController.setTierlist("test", Service.ANILIST, ContentType.ANIME, tiers);
-
-        verify(tierListsRepository, times(1)).save(tierListCaptor.capture());
-        TierList capturedTierlist = tierListCaptor.getValue();
-        assertEquals(user, capturedTierlist.getUser());
-        assertEquals(Service.ANILIST, capturedTierlist.getService());
-        assertEquals(ContentType.ANIME, capturedTierlist.getType());
-        for (int i = 0; i < capturedTierlist.getTiers().size() && i < tiers.size(); i++) {
-            assertEquals(capturedTierlist.getTiers().get(i).getColor(), tiers.get(i).getColor());
-            assertEquals(capturedTierlist.getTiers().get(i).getName(), tiers.get(i).getName());
-            assertEquals(capturedTierlist.getTiers().get(i).getScore(), tiers.get(i).getScore());
-            assertEquals(capturedTierlist.getTiers().get(i).getAdjustedScore(), tiers.get(i).getAdjustedScore());
-        }
     }
 
-    @Test
-    public void setTierListExisting() {
+    @ParameterizedTest
+    @MethodSource("settingTierlist")
+    public void setTierListExisting(List<Tier> immutableExistingTiers, List<TierDTO> changedTiers, List<Tier> expectedTiers, List<Tier> expectedRemovedTiers) {
         User user = new User();
         user.setUsername("test");
         user.setAnilistConnection(new AniListConnection());
         when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
 
-        List<Tier> existingTiers = new ArrayList<>();
-        existingTiers.add(new Tier(UUID.randomUUID(), "#666666", "testing 6", 10, 10));
-        existingTiers.add(new Tier(UUID.randomUUID(), "#777777", "testing 7", 7, 7));
-        existingTiers.add(new Tier(UUID.randomUUID(), "#888888", "testing 8", 4, 4));
-        existingTiers.add(new Tier(UUID.randomUUID(), "#999999", "testing 9", 1, 1));
-
+        List<Tier> existingTiers = new ArrayList<>(immutableExistingTiers);
         TierList tierList = new TierList();
         tierList.setUser(user);
         tierList.setTiers(existingTiers);
-        when(tierListsRepository.findByUserAndServiceAndType(any(), any(), any())).thenReturn(Optional.of(tierList));
+        when(tierListsRepository.findByUserAndServiceAndType(any(), any(), any())).thenReturn(!immutableExistingTiers.isEmpty() ? Optional.of(tierList) : Optional.empty());
         when(tierListsRepository.save(any())).thenReturn(null);
 
-        List<TierDTO> tiers = List.of(
-                new TierDTO("#111111", "testing 1", 10, 10),
-                new TierDTO("#222222", "testing 2", 8, 8),
-                new TierDTO("#333333", "testing 3", 6, 6),
-                new TierDTO("#444444", "testing 4", 4, 4)
-        );
-
         ArgumentCaptor<TierList> tierListCaptor = ArgumentCaptor.forClass(TierList.class);
+        ArgumentCaptor<List<Tier>> tiersCaptor = ArgumentCaptor.forClass(List.class);
 
-        tiersController.setTierlist("test", Service.ANILIST, ContentType.ANIME, tiers);
+        tiersController.setTierlist("test", ThirdPartyService.ANILIST, ContentType.ANIME, changedTiers);
 
         verify(tierListsRepository, times(1)).save(tierListCaptor.capture());
+
+        if (!immutableExistingTiers.isEmpty()) { // without existing tierlist no deletion will occur
+            verify(tiersRepository, times(1)).deleteAll(tiersCaptor.capture());
+            List<Tier> removedTiers = tiersCaptor.getValue();
+            assertEquals(expectedRemovedTiers.size(), removedTiers.size());
+            for (int i = 0; i < removedTiers.size(); i++) {
+                assertEquals(removedTiers.get(i).getColor(), expectedRemovedTiers.get(i).getColor());
+                assertEquals(removedTiers.get(i).getName(), expectedRemovedTiers.get(i).getName());
+                assertEquals(removedTiers.get(i).getScore(), expectedRemovedTiers.get(i).getScore());
+                assertEquals(removedTiers.get(i).getAdjustedScore(), expectedRemovedTiers.get(i).getAdjustedScore());
+            }
+        }
+
         TierList capturedTierlist = tierListCaptor.getValue();
         assertEquals(user, capturedTierlist.getUser());
-        for (int i = 0; i < capturedTierlist.getTiers().size() && i < tiers.size(); i++) {
-            assertEquals(capturedTierlist.getTiers().get(i).getColor(), tiers.get(i).getColor());
-            assertEquals(capturedTierlist.getTiers().get(i).getName(), tiers.get(i).getName());
-            assertEquals(capturedTierlist.getTiers().get(i).getScore(), tiers.get(i).getScore());
-            assertEquals(capturedTierlist.getTiers().get(i).getAdjustedScore(), tiers.get(i).getAdjustedScore());
+        assertEquals(expectedTiers.size(), capturedTierlist.getTiers().size());
+        for (int i = 0; i < capturedTierlist.getTiers().size(); i++) {
+            assertEquals(capturedTierlist.getTiers().get(i).getColor(), expectedTiers.get(i).getColor());
+            assertEquals(capturedTierlist.getTiers().get(i).getName(), expectedTiers.get(i).getName());
+            assertEquals(capturedTierlist.getTiers().get(i).getScore(), expectedTiers.get(i).getScore());
+            assertEquals(capturedTierlist.getTiers().get(i).getAdjustedScore(), expectedTiers.get(i).getAdjustedScore());
         }
     }
 }
