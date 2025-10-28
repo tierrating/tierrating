@@ -39,6 +39,8 @@ public class AniListController {
     private String clientKey;
     @Value("${services.anilist.client.secret}")
     private String clientSecret;
+    @Value("${services.anilist.url")
+    private String redirectUrl;
 
     @PostMapping("auth/{username}")
     @PreAuthorize("authentication.principal.username == #username")
@@ -52,7 +54,7 @@ public class AniListController {
         requestBody.put("grant_type", "authorization_code");
         requestBody.put("client_id", clientKey);
         requestBody.put("client_secret", clientSecret);
-        requestBody.put("redirect_uri", "http://localhost:3000/auth/anilist");
+        requestBody.put("redirect_uri", redirectUrl);
         requestBody.put("code", request.getCode());
 
         RestTemplate restTemplate = new RestTemplate();

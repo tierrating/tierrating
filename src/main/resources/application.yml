@@ -24,3 +24,4 @@ services:
     client:
       key: ${ANILIST_CLIENT_KEY}
       secret: ${ANILIST_CLIENT_SECRET}
+    url: ${ANILIST_REDIRECT_URL}
