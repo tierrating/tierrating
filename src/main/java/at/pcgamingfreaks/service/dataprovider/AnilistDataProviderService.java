@@ -69,7 +69,7 @@ public class AnilistDataProviderService implements DataProviderService {
         do {
             page = createGraphQlClient()
                     .document(query)
-                    .variable("userId", user.getAnilistConnection().getAnilistId())
+                    .variable("userId", user.getAnilistConnection().getThirdpartyUserId())
                     .variable("type", type.name())
                     .variable("status", "COMPLETED")
                     .variable("page", currentPage++)

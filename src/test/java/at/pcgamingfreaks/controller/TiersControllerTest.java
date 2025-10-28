@@ -4,7 +4,7 @@ import at.pcgamingfreaks.model.ContentType;
 import at.pcgamingfreaks.model.ThirdPartyService;
 import at.pcgamingfreaks.model.Tier;
 import at.pcgamingfreaks.model.TierList;
-import at.pcgamingfreaks.model.auth.AniListConnection;
+import at.pcgamingfreaks.model.auth.ThirdPartyConnection;
 import at.pcgamingfreaks.model.auth.User;
 import at.pcgamingfreaks.model.dto.TierDTO;
 import at.pcgamingfreaks.model.repo.TierListsRepository;
@@ -100,7 +100,7 @@ class TiersControllerTest {
     public void setTierListExisting(List<Tier> immutableExistingTiers, List<TierDTO> changedTiers, List<Tier> expectedTiers, List<Tier> expectedRemovedTiers) {
         User user = new User();
         user.setUsername("test");
-        user.setAnilistConnection(new AniListConnection());
+        user.setAnilistConnection(new ThirdPartyConnection());
         when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
 
         List<Tier> existingTiers = new ArrayList<>(immutableExistingTiers);

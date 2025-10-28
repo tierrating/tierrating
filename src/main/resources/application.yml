@@ -25,3 +25,8 @@ services:
       key: ${ANILIST_CLIENT_KEY}
       secret: ${ANILIST_CLIENT_SECRET}
     url: ${ANILIST_REDIRECT_URL}
+  trakt:
+    client:
+      key: ${TRAKT_CLIENT_KEY}
+      secret: ${TRAKT_CLIENT_SECRET}
+    url: ${TRAKT_REDIRECT_URL}

@@ -41,8 +41,11 @@ public class User implements UserDetails {
 
     private String bio;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private AniListConnection anilistConnection;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private ThirdPartyConnection anilistConnection;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private  ThirdPartyConnection traktConnection;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<TierList> tierlists;
