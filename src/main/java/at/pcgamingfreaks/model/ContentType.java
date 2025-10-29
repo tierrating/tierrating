@@ -2,5 +2,7 @@ package at.pcgamingfreaks.model;
 
 public enum ContentType {
     ANIME,
-    MANGA
+    MANGA,
+    MOVIES,
+    TVSHOWS,
 }

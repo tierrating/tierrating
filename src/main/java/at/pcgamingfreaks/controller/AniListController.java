@@ -1,18 +1,17 @@
 package at.pcgamingfreaks.controller;
 
+import at.pcgamingfreaks.config.ThirdPartyConfig;
 import at.pcgamingfreaks.model.ThirdPartyService;
 import at.pcgamingfreaks.model.auth.ThirdPartyConnection;
 import at.pcgamingfreaks.model.auth.User;
 import at.pcgamingfreaks.model.dto.AuthTokenResponseDTO;
 import at.pcgamingfreaks.model.dto.ThirdPartyAuthRequestDTO;
 import at.pcgamingfreaks.model.dto.ThirdPartyAuthResponseDTO;
-import at.pcgamingfreaks.model.repo.ThirdpartyConnectionRepository;
 import at.pcgamingfreaks.model.repo.UserRepository;
 import at.pcgamingfreaks.model.util.JwtPayload;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -33,15 +32,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AniListController {
     private final UserRepository userRepository;
-    private final ThirdpartyConnectionRepository thirdpartyConnectionRepository;
     private final ObjectMapper objectMapper;
-
-    @Value("${services.anilist.client.key}")
-    private String clientKey;
-    @Value("${services.anilist.client.secret}")
-    private String clientSecret;
-    @Value("${services.anilist.url}")
-    private String redirectUrl;
+    private final ThirdPartyConfig thirdPartyConfig;
 
     @PostMapping("auth/{username}")
     @PreAuthorize("authentication.principal.username == #username")
@@ -57,9 +49,9 @@ public class AniListController {
 
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("grant_type", "authorization_code");
-        requestBody.put("client_id", clientKey);
-        requestBody.put("client_secret", clientSecret);
-        requestBody.put("redirect_uri", redirectUrl);
+        requestBody.put("client_id", thirdPartyConfig.getAnilistClientKey());
+        requestBody.put("client_secret", thirdPartyConfig.getAnilistClientSecret());
+        requestBody.put("redirect_uri", thirdPartyConfig.getAnilistRedirectUrl());
         requestBody.put("code", request.getCode());
 
         RestTemplate restTemplate = new RestTemplate();

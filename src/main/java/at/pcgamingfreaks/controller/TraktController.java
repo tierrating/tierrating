@@ -1,5 +1,6 @@
 package at.pcgamingfreaks.controller;
 
+import at.pcgamingfreaks.config.ThirdPartyConfig;
 import at.pcgamingfreaks.model.ThirdPartyService;
 import at.pcgamingfreaks.model.auth.ThirdPartyConnection;
 import at.pcgamingfreaks.model.auth.User;
@@ -13,7 +14,6 @@ import com.uwetrottmann.trakt5.entities.UserSlug;
 import com.uwetrottmann.trakt5.enums.Extended;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -30,13 +30,7 @@ import java.time.LocalDateTime;
 public class TraktController {
     private final UserRepository userRepository;
     private final ThirdpartyConnectionRepository thirdpartyConnectionRepository;
-
-    @Value("${services.trakt.client.key}")
-    private String clientKey;
-    @Value("${services.trakt.client.secret}")
-    private String clientSecret;
-    @Value("${services.trakt.url}")
-    private String redirectUrl;
+    private final ThirdPartyConfig thirdPartyConfig;
 
     @PostMapping("auth/{username}")
     @PreAuthorize("authentication.principal.username == #username")
@@ -52,7 +46,7 @@ public class TraktController {
 
         ThirdPartyAuthResponseDTO responseDto = new ThirdPartyAuthResponseDTO();
         try {
-            TraktV2 trakt = new TraktV2(clientKey, clientSecret, redirectUrl);
+            TraktV2 trakt = new TraktV2(thirdPartyConfig.getTraktClientKey(), thirdPartyConfig.getTraktClientSecret(), thirdPartyConfig.getTraktRedirectUrl());
             Response<AccessToken> response = trakt.exchangeCodeForAccessToken(requestBody.getCode());
             if (!response.isSuccessful()) throw new RuntimeException("Trakt OAuth responded with empty body");
 
