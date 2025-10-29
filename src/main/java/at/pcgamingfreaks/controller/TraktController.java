@@ -48,8 +48,9 @@ public class TraktController {
         log.info("Auth request for {} with code {}", username, requestBody.getCode());
 
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User does not exist"));
-        ThirdPartyAuthResponseDTO responseDto = new ThirdPartyAuthResponseDTO();
+        if (user.getAnilistConnection() != null) throw new RuntimeException("Already authenticated");
 
+        ThirdPartyAuthResponseDTO responseDto = new ThirdPartyAuthResponseDTO();
         try {
             TraktV2 trakt = new TraktV2(clientKey, clientSecret, redirectUrl);
             Response<AccessToken> response = trakt.exchangeCodeForAccessToken(requestBody.getCode());
@@ -58,15 +59,13 @@ public class TraktController {
             Response<com.uwetrottmann.trakt5.entities.User> traktUserInfo = trakt.accessToken(response.body().access_token).users().profile(UserSlug.ME, Extended.METADATA).execute();
             if (!traktUserInfo.isSuccessful()) throw new RuntimeException("Trakt OAuth responded with empty username");
 
-            user.setTraktConnection(user.getTraktConnection() != null ? user.getTraktConnection() : new ThirdPartyConnection());
             ThirdPartyConnection connection = user.getTraktConnection();
-            connection.setUser(user);
             connection.setService(ThirdPartyService.TRAKT);
             connection.setAccessToken(response.body().access_token);
             connection.setRefreshToken(response.body().refresh_token);
             connection.setExpiresOn(LocalDateTime.now().plusSeconds(response.body().expires_in));
             connection.setThirdpartyUserId(traktUserInfo.body().ids.slug);
-            thirdpartyConnectionRepository.save(connection);
+            user.setTraktConnection(connection);
             userRepository.save(user);
         } catch (Exception e) {
             log.error(e.getMessage());

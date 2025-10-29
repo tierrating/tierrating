@@ -51,6 +51,10 @@ public class AniListController {
             @RequestBody ThirdPartyAuthRequestDTO request
     ) {
         log.info("Auth request for {}", username);
+
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User does not exist"));
+        if (user.getAnilistConnection() != null) throw new RuntimeException("Already authenticated");
+
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("grant_type", "authorization_code");
         requestBody.put("client_id", clientKey);
@@ -78,18 +82,13 @@ public class AniListController {
             if (!tokenResponse.hasBody() || tokenResponse.getBody() == null)
                 throw new RuntimeException("AniList OAuth responded with empty body");
 
-
-            User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User does not exist"));
-            user.setAnilistConnection(user.getAnilistConnection() != null ? user.getAnilistConnection() : new ThirdPartyConnection());
-
             ThirdPartyConnection connection = user.getAnilistConnection();
-            connection.setUser(user);
             connection.setService(ThirdPartyService.ANILIST);
             connection.setAccessToken(tokenResponse.getBody().getAccessToken());
             connection.setRefreshToken(tokenResponse.getBody().getRefreshToken());
             connection.setExpiresOn(LocalDateTime.now().plusSeconds(tokenResponse.getBody().getExpiresIn()));
             connection.setThirdpartyUserId(String.valueOf(extractUserIdFrom(connection.getAccessToken())));
-            thirdpartyConnectionRepository.save(connection);
+            user.setAnilistConnection(connection);
             userRepository.save(user);
 
         } catch (Exception e) {

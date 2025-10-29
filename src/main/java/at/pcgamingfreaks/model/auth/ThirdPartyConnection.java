@@ -18,10 +18,6 @@ public class ThirdPartyConnection {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
     private ThirdPartyService service;
     private String thirdpartyUserId;
 

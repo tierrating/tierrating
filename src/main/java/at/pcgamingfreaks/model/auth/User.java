@@ -41,10 +41,10 @@ public class User implements UserDetails {
 
     private String bio;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private ThirdPartyConnection anilistConnection;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private  ThirdPartyConnection traktConnection;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
