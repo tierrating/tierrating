@@ -8,7 +8,7 @@ import at.pcgamingfreaks.model.auth.User;
 import at.pcgamingfreaks.model.dto.ListEntryDTO;
 import at.pcgamingfreaks.model.repo.UserRepository;
 import com.uwetrottmann.trakt5.TraktV2;
-import com.uwetrottmann.trakt5.entities.RatedMovie;
+import com.uwetrottmann.trakt5.entities.BaseRatedEntity;
 import com.uwetrottmann.trakt5.entities.UserSlug;
 import com.uwetrottmann.trakt5.enums.Extended;
 import com.uwetrottmann.trakt5.enums.RatingsFilter;
@@ -33,15 +33,42 @@ public class TraktDataProviderService implements DataProviderService {
     @Override
     public List<ListEntryDTO> fetchData(String username, ContentType type) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
-        try {
-            Response<List<RatedMovie>> response = new TraktV2(thirdPartyConfig.getTraktClientKey(), thirdPartyConfig.getTraktClientSecret(), thirdPartyConfig.getTraktRedirectUrl())
-                    .users().ratingsMovies(UserSlug.fromUsername(user.getTraktConnection().getThirdpartyUserId()), RatingsFilter.ALL, Extended.FULL).execute();
-            if (!response.isSuccessful()) throw new RuntimeException("Error retrieving watched movies of " + username);
+        return switch (type) {
+            case MOVIES -> fetchMovies(user);
+            case TVSHOWS -> fetchTvshows(user);
+            default -> throw new RuntimeException("Invalid content type for provider");
+        };
+    }
 
-            return response.body().stream()
-                    .map(ListEntryDtoMapper::map)
-                    .sorted((e1, e2) -> e1.getScore() < e2.getScore() ? 1 : -1)
-                    .toList();
+    private <T extends BaseRatedEntity> List<ListEntryDTO> fetchData(User user, Response<List<T>> response) {
+        if (!response.isSuccessful())
+            throw new RuntimeException("Error retrieving watched movies of " + user.getUsername());
+
+        return response.body().stream()
+                .map(ListEntryDtoMapper::map)
+                .sorted((e1, e2) -> e1.getScore() < e2.getScore() ? 1 : -1)
+                .toList();
+    }
+
+    private List<ListEntryDTO> fetchMovies(User user) {
+        try {
+            return fetchData(
+                    user,
+                    new TraktV2(thirdPartyConfig.getTraktClientKey(), thirdPartyConfig.getTraktClientSecret(), thirdPartyConfig.getTraktRedirectUrl())
+                            .users().ratingsMovies(UserSlug.fromUsername(user.getTraktConnection().getThirdpartyUserId()), RatingsFilter.ALL, Extended.FULL).execute()
+            );
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<ListEntryDTO> fetchTvshows(User user) {
+        try {
+            return fetchData(
+                    user,
+                    new TraktV2(thirdPartyConfig.getTraktClientKey(), thirdPartyConfig.getTraktClientSecret(), thirdPartyConfig.getTraktRedirectUrl())
+                            .users().ratingsShows(UserSlug.fromUsername(user.getTraktConnection().getThirdpartyUserId()), RatingsFilter.ALL, Extended.FULL).execute()
+            );
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
