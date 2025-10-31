@@ -1,0 +1,20 @@
+POST http://localhost:8080/trakt/auth/RatzzFatzz
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJSYXR6ekZhdHp6IiwiaWF0IjoxNzYxNjgyNzczLCJleHAiOjE3NjE2ODYzNzN9.S_olR7lwFwwvi5J1wiygFaAJvty3aq38oADEZNbDsY4
+Content-Type: application/json
+
+{
+  "code": "040e2507c4c35a012444d03790388c00990293479feec98c59858a786cd05d56"
+}
+
+###
+
+POST https://api.trakt.tv/oauth/token
+Content-Type: application/json
+
+{
+  "code": "e2b64fab1d56a1a11849b99e5aaed939161c5ee1ffdc97b6af63ef2e593491c0",
+  "client_id": "271129879907506896d543ce9469f48f89cc0f839faf3e11c29e7ced0608bf4e",
+  "client_secret": "4171dc8caa4f8623ac77d0b8650185cf7b289a0df64e2a50ec06b8838297e56b",
+  "redirect_uri": "http://localhost:3000/auth/trakt",
+  "grant_type": "authorization_code",
+}

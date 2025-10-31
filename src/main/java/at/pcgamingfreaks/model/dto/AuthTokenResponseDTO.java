@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AniListAuthTokenResponseDTO {
+public class AuthTokenResponseDTO {
     @JsonProperty("expires_in")
     private int expiresIn;
     @JsonProperty("access_token")

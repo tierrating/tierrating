@@ -1,17 +1,17 @@
 package at.pcgamingfreaks.controller;
 
-import at.pcgamingfreaks.model.auth.AniListConnection;
+import at.pcgamingfreaks.config.ThirdPartyConfig;
+import at.pcgamingfreaks.model.ThirdPartyService;
+import at.pcgamingfreaks.model.auth.ThirdPartyConnection;
 import at.pcgamingfreaks.model.auth.User;
-import at.pcgamingfreaks.model.dto.AniListAuthTokenResponseDTO;
+import at.pcgamingfreaks.model.dto.AuthTokenResponseDTO;
 import at.pcgamingfreaks.model.dto.ThirdPartyAuthRequestDTO;
 import at.pcgamingfreaks.model.dto.ThirdPartyAuthResponseDTO;
-import at.pcgamingfreaks.model.repo.AniListConnectionRepository;
 import at.pcgamingfreaks.model.repo.UserRepository;
 import at.pcgamingfreaks.model.util.JwtPayload;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -32,13 +32,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AniListController {
     private final UserRepository userRepository;
-    private final AniListConnectionRepository aniListConnectionRepository;
     private final ObjectMapper objectMapper;
-
-    @Value("${services.anilist.client.key}")
-    private String clientKey;
-    @Value("${services.anilist.client.secret}")
-    private String clientSecret;
+    private final ThirdPartyConfig thirdPartyConfig;
 
     @PostMapping("auth/{username}")
     @PreAuthorize("authentication.principal.username == #username")
@@ -48,11 +43,15 @@ public class AniListController {
             @RequestBody ThirdPartyAuthRequestDTO request
     ) {
         log.info("Auth request for {}", username);
+
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User does not exist"));
+        if (user.getAnilistConnection() != null) throw new RuntimeException("Already authenticated");
+
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("grant_type", "authorization_code");
-        requestBody.put("client_id", clientKey);
-        requestBody.put("client_secret", clientSecret);
-        requestBody.put("redirect_uri", "http://localhost:3000/auth/anilist");
+        requestBody.put("client_id", thirdPartyConfig.getAnilistClientKey());
+        requestBody.put("client_secret", thirdPartyConfig.getAnilistClientSecret());
+        requestBody.put("redirect_uri", thirdPartyConfig.getAnilistRedirectUrl());
         requestBody.put("code", request.getCode());
 
         RestTemplate restTemplate = new RestTemplate();
@@ -65,27 +64,23 @@ public class AniListController {
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(requestBody, headers);
 
         try {
-            ResponseEntity<AniListAuthTokenResponseDTO> tokenResponse = restTemplate.exchange(
+            ResponseEntity<AuthTokenResponseDTO> tokenResponse = restTemplate.exchange(
                     "https://anilist.co/api/v2/oauth/token",
                     HttpMethod.POST,
                     entity,
-                    AniListAuthTokenResponseDTO.class
+                    AuthTokenResponseDTO.class
             );
 
             if (!tokenResponse.hasBody() || tokenResponse.getBody() == null)
-                throw new RuntimeException("AniList OAuth responded with empyt body");
+                throw new RuntimeException("AniList OAuth responded with empty body");
 
-
-            User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User does not exist"));
-            user.setAnilistConnection(user.getAnilistConnection() != null ? user.getAnilistConnection() : new AniListConnection());
-
-            AniListConnection connection = user.getAnilistConnection();
-            connection.setUser(user);
+            ThirdPartyConnection connection = user.getAnilistConnection();
+            connection.setService(ThirdPartyService.ANILIST);
             connection.setAccessToken(tokenResponse.getBody().getAccessToken());
             connection.setRefreshToken(tokenResponse.getBody().getRefreshToken());
             connection.setExpiresOn(LocalDateTime.now().plusSeconds(tokenResponse.getBody().getExpiresIn()));
-            connection.setAnilistId(extractUserIdFrom(connection.getAccessToken()));
-            aniListConnectionRepository.save(connection);
+            connection.setThirdpartyUserId(String.valueOf(extractUserIdFrom(connection.getAccessToken())));
+            user.setAnilistConnection(connection);
             userRepository.save(user);
 
         } catch (Exception e) {

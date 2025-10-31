@@ -22,6 +22,7 @@ public enum ThirdPartyService {
     public static boolean hasUserConnection(User user, ThirdPartyService service) {
         return switch (service) {
             case ANILIST -> user.getAnilistConnection() != null;
+            case TRAKT -> user.getTraktConnection() != null;
             default ->  false;
         };
     }

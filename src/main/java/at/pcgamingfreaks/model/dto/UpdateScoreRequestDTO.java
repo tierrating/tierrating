@@ -1,5 +1,6 @@
 package at.pcgamingfreaks.model.dto;
 
+import at.pcgamingfreaks.model.ContentType;
 import at.pcgamingfreaks.model.ThirdPartyService;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,7 @@ import lombok.Setter;
 public class UpdateScoreRequestDTO {
     private String username;
     private ThirdPartyService service;
+    private ContentType type;
 
     private long id;
     private double score;

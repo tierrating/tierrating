@@ -1,5 +1,6 @@
 package at.pcgamingfreaks.model.auth;
 
+import at.pcgamingfreaks.model.ThirdPartyService;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,15 +10,16 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-public class AniListConnection {
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "user_id", "service"})
+})
+public class ThirdPartyConnection {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    @OneToOne
-    private User user;
-
-    private long anilistId;
+    private ThirdPartyService service;
+    private String thirdpartyUserId;
 
     private LocalDateTime expiresOn;
     @Column(length = 2047)

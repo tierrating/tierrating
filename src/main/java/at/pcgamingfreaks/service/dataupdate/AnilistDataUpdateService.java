@@ -1,5 +1,6 @@
 package at.pcgamingfreaks.service.dataupdate;
 
+import at.pcgamingfreaks.model.ContentType;
 import at.pcgamingfreaks.model.ThirdPartyService;
 import at.pcgamingfreaks.model.auth.User;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class AnilistDataUpdateService implements DataUpdateService {
     }
 
     @Override
-    public void updateData(long id, double score, User user) {
+    public void updateData(long id, double score, User user, ContentType contentType) {
 
         createGraphQlClient()
                 .mutate()

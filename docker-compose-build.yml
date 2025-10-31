@@ -13,8 +13,12 @@ services:
       DB_PORT: 5432
       DB_USERNAME: tierrating
       DB_PASSWORD: testingPW
-      ANILIST_CLIENT_KEY:
-      ANILIST_CLIENT_SECRET:
+      ANILIST_CLIENT_KEY: 27404
+      ANILIST_CLIENT_SECRET: xIEtzpqYI7jXaWJ4wuB4UKcGlWankJNeqXLIWsro
+      ANILIST_REDIRECT_URL: http://localhost:3000/auth/anilist
+      TRAKT_CLIENT_KEY: 271129879907506896d543ce9469f48f89cc0f839faf3e11c29e7ced0608bf4e
+      TRAKT_CLIENT_SECRET: xIEtzpqYI7jXaWJ4wuB4UKcGlWankJNeqXLIWsro
+      TRAKT_REDIRECT_URL: http://localhost:3000/auth/anilist
 
   ui:
     build: ../tierrating-ui

@@ -126,6 +126,13 @@
             <version>2.3.0</version>
         </dependency>
 
+        <!-- trakt -->
+        <dependency>
+            <groupId>com.uwetrottmann.trakt5</groupId>
+            <artifactId>trakt-java</artifactId>
+            <version>6.16.0</version>
+        </dependency>
+
         <!-- annotation processor -->
         <dependency>
             <groupId>org.projectlombok</groupId>
