@@ -41,6 +41,7 @@ public class DataController {
                                                         @PathVariable ThirdPartyService service,
                                                         @PathVariable ContentType type) {
         DataProviderService dataProviderService = dataProviderFactory.getProvider(service);
+        if (!dataProviderService.isTypeAllowed(type)) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(dataProviderService.fetchData(username, type));
     }
 

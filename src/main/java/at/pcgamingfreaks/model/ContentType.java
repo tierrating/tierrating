@@ -6,16 +6,14 @@ public enum ContentType {
     ANIME,
     MANGA,
     MOVIES,
-    TVSHOWS;
-
-    public String toString() {
-        return name().toLowerCase();
-    }
+    TVSHOWS,
+    TVSHOWS_SEASONS;
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static ContentType from(String text) {
+        text = text.replace("-", "_");
         for (ContentType type : ContentType.values()) {
-            if (type.toString().equalsIgnoreCase(text)) return type;
+            if (type.name().equalsIgnoreCase(text)) return type;
         }
         throw new IllegalArgumentException();
     }

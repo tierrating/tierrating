@@ -7,7 +7,6 @@ Content-Type: application/json
 }
 
 ###
-
 POST https://api.trakt.tv/oauth/token
 Content-Type: application/json
 
@@ -16,5 +15,19 @@ Content-Type: application/json
   "client_id": "271129879907506896d543ce9469f48f89cc0f839faf3e11c29e7ced0608bf4e",
   "client_secret": "4171dc8caa4f8623ac77d0b8650185cf7b289a0df64e2a50ec06b8838297e56b",
   "redirect_uri": "http://localhost:3000/auth/trakt",
-  "grant_type": "authorization_code",
+  "grant_type": "authorization_code"
 }
+
+### Fetch trakt-movies
+GET http://localhost:8080/data/RatzzFatzz/trakt/movies
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJSYXR6ekZhdHp6IiwiaWF0IjoxNzYxOTE0NTAzLCJleHAiOjE3NjE5MTgxMDN9.IMRv7ZRa5q0RQEQ6bhAKUpwyKVA6O6hwmc0DZHtMjz4
+Content-Type: application/json
+
+### Fetch trakt-tvshows-seasons
+GET http://localhost:8080/data/RatzzFatzz/trakt/tvshows-seasons
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJSYXR6ekZhdHp6IiwiaWF0IjoxNzYxOTIyNTk3LCJleHAiOjE3NjE5MjYxOTd9.HijuVfBpG8CagfkEmK7Z78hb2rE-USW_twaKWFW0mgI
+Content-Type: application/json
+
+###
+GET https://api.trakt.tv/users/ratzzfatzz/ratings/movies
+trakt-api-key: 271129879907506896d543ce9469f48f89cc0f839faf3e11c29e7ced0608bf4e
