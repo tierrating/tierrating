@@ -51,4 +51,16 @@ public class AuthService {
 
         return response;
     }
+
+    public LoginResponseDTO refreshToken(String token) {
+        if (jwtService.isTokenExpired(token)) throw new RuntimeException("Toke is invalid and can't be refreshed");
+
+        String username = jwtService.extractUsername(token);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+
+        String refreshedToken = jwtService.create(user.getUsername());
+
+        return new LoginResponseDTO(refreshedToken);
+    }
 }
