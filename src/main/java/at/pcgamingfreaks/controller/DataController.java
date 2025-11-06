@@ -59,7 +59,7 @@ public class DataController {
         }
 
         try {
-            dataUpdateFactory.getProvider(request.getService()).updateData(request.getId(), request.getScore(), user.get(), request.getType());
+            dataUpdateFactory.getProvider(request.getService(), request.getType()).updateData(request.getId(), request.getScore(), user.get());
             return ResponseEntity.ok(UpdateScoreResponseDTO.success());
         }  catch (Exception e) {
             log.error("Failed updating score for {}", user.get().getUsername(), e);

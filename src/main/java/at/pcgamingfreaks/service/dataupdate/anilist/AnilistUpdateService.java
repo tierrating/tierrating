@@ -1,8 +1,8 @@
-package at.pcgamingfreaks.service.dataupdate;
+package at.pcgamingfreaks.service.dataupdate.anilist;
 
-import at.pcgamingfreaks.model.ContentType;
 import at.pcgamingfreaks.model.ThirdPartyService;
 import at.pcgamingfreaks.model.auth.User;
+import at.pcgamingfreaks.service.dataupdate.DataUpdateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.graphql.client.HttpGraphQlClient;
@@ -13,8 +13,7 @@ import static at.pcgamingfreaks.config.GlobalProperties.ANILIST_API_URL;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class AnilistDataUpdateService implements DataUpdateService {
+public abstract class AnilistUpdateService implements DataUpdateService {
     private final String ANILIST_UPDATE_QUERY = """
             mutation ($listEntryId: Int, $mediaId: Int, $score: Float) {
               SaveMediaListEntry(id: $listEntryId, mediaId: $mediaId, score: $score) {
@@ -31,9 +30,8 @@ public class AnilistDataUpdateService implements DataUpdateService {
     }
 
     @Override
-    public void updateData(long id, double score, User user, ContentType contentType) {
-
-        createGraphQlClient()
+    public void updateData(long id, double score, User user) {
+        HttpGraphQlClient.create(WebClient.create(ANILIST_API_URL))
                 .mutate()
                 .header("Authorization", user.getAnilistConnection().getAccessToken())
                 .build()
@@ -41,11 +39,5 @@ public class AnilistDataUpdateService implements DataUpdateService {
                 .variable("mediaId", id)
                 .variable("score", score)
                 .retrieveSync("UpdateMediaListEntries");
-
-    }
-
-    private HttpGraphQlClient createGraphQlClient() {
-        WebClient webClient = WebClient.create(ANILIST_API_URL);
-        return HttpGraphQlClient.create(webClient);
     }
 }
