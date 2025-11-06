@@ -9,7 +9,9 @@ import com.uwetrottmann.trakt5.entities.*;
 import com.uwetrottmann.trakt5.enums.Rating;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
 
@@ -32,6 +34,20 @@ public class TraktUpdateService implements DataUpdateService {
                         update(new SyncMovie().id(MovieIds.trakt((int) id)).rating(Rating.fromValue((int) score)), user);
                 case TVSHOWS ->
                         update(new SyncShow().id(ShowIds.trakt((int) id)).rating(Rating.fromValue((int) score)), user);
+                case TVSHOWS_SEASONS -> {
+                    String body = "{\"seasons\":[{\"ids\":{\"trakt\":" + id + "},\"rating\":" + (int) score + "}]}";
+                    RestClient.builder()
+                            .baseUrl("https://api.trakt.tv")
+                            .defaultHeader("Authorization", user.getTraktConnection().getAccessToken())
+                            .build()
+                            .post()
+                            .uri("/sync/ratings")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("trakt-api-key", thirdPartyConfig.getTraktClientKey())
+                            .body(body)
+                            .retrieve()
+                            .body(String.class);
+                }
             }
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -50,4 +66,5 @@ public class TraktUpdateService implements DataUpdateService {
                 .accessToken(user.getTraktConnection().getAccessToken())
                 .sync().addRatings(new SyncItems().shows(show)).execute();
     }
+
 }

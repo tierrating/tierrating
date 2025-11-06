@@ -6,6 +6,7 @@ import at.pcgamingfreaks.model.anilist.AniListMediaTitle;
 import at.pcgamingfreaks.model.dto.ListEntryDTO;
 import com.uwetrottmann.trakt5.entities.BaseRatedEntity;
 import com.uwetrottmann.trakt5.entities.RatedMovie;
+import com.uwetrottmann.trakt5.entities.RatedSeason;
 import com.uwetrottmann.trakt5.entities.RatedShow;
 import org.apache.logging.log4j.util.Strings;
 
@@ -24,8 +25,13 @@ public class ListEntryDtoMapper {
         return dto;
     }
 
+    public static ListEntryDTO map(Object object) {
+        return new ListEntryDTO();
+    }
+
     public static ListEntryDTO map(BaseRatedEntity entry) {
         if (entry instanceof RatedMovie) return map((RatedMovie) entry);
+        if (entry instanceof RatedSeason) return map((RatedSeason) entry);
         if (entry instanceof RatedShow) return map((RatedShow) entry);
         throw new RuntimeException("Invalid entry type");
     }
@@ -43,6 +49,15 @@ public class ListEntryDtoMapper {
         ListEntryDTO dto = new ListEntryDTO();
         dto.setId(entry.show.ids.trakt);
         dto.setTitle(entry.show.title);
+        dto.setCover("https://walter-r2.trakt.tv/images/shows/000/169/967/posters/thumb/cdeb60fec1.jpg.webp");
+        dto.setScore(entry.rating.value);
+        return dto;
+    }
+
+    private static ListEntryDTO map(RatedSeason entry) {
+        ListEntryDTO dto = new ListEntryDTO();
+        dto.setId(entry.season.ids.trakt);
+        dto.setTitle(String.format("%s %s", entry.show.title, entry.season.title));
         dto.setCover("https://walter-r2.trakt.tv/images/shows/000/169/967/posters/thumb/cdeb60fec1.jpg.webp");
         dto.setScore(entry.rating.value);
         return dto;
