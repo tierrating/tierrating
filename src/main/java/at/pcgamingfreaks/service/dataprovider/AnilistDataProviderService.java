@@ -26,6 +26,7 @@ import static at.pcgamingfreaks.config.GlobalProperties.ANILIST_API_URL;
 @RequiredArgsConstructor
 public class AnilistDataProviderService implements DataProviderService {
     private final UserRepository userRepository;
+    private final  ListEntryDtoMapper listEntryDtoMapper;
 
     public ThirdPartyService getService() {
         return ThirdPartyService.ANILIST;
@@ -82,7 +83,7 @@ public class AnilistDataProviderService implements DataProviderService {
         log.info("Retrieving data from Anilist for {} took {}{}", username,  requestDuration > 1000 ? requestDuration / 1000 : requestDuration, requestDuration > 1000 ? "s" : "ms");
 
         return result.stream()
-                .map(ListEntryDtoMapper::map)
+                .map(listEntryDtoMapper::map)
                 .sorted(Comparator.comparing(ListEntryDTO::getScore).reversed())
                 .toList();
     }

@@ -25,6 +25,7 @@ import java.util.List;
 public class TraktDataProviderService implements DataProviderService {
     private final UserRepository userRepository;
     private final ThirdPartyConfig thirdPartyConfig;
+    private final ListEntryDtoMapper listEntryDtoMapper;
 
     @Override
     public ThirdPartyService getService() {
@@ -50,9 +51,8 @@ public class TraktDataProviderService implements DataProviderService {
         if (!response.isSuccessful())
             throw new RuntimeException("Error retrieving watched movies of " + user.getUsername());
 
-
         return response.body().stream()
-                .map(ListEntryDtoMapper::map)
+                .map(listEntryDtoMapper::map)
                 .sorted(Comparator.comparing(ListEntryDTO::getScore).reversed())
                 .toList();
     }
