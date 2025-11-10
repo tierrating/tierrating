@@ -75,7 +75,7 @@ public class AniListController implements ThirdPartyController{
             if (!tokenResponse.hasBody() || tokenResponse.getBody() == null)
                 throw new RuntimeException("AniList OAuth responded with empty body");
 
-            ThirdPartyConnection connection = user.getAnilistConnection();
+            ThirdPartyConnection connection = new ThirdPartyConnection();
             connection.setService(ThirdPartyService.ANILIST);
             connection.setAccessToken(tokenResponse.getBody().getAccessToken());
             connection.setRefreshToken(tokenResponse.getBody().getRefreshToken());

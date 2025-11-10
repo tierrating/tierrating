@@ -52,7 +52,7 @@ public class TraktController implements ThirdPartyController {
             Response<com.uwetrottmann.trakt5.entities.User> traktUserInfo = trakt.accessToken(response.body().access_token).users().profile(UserSlug.ME, Extended.METADATA).execute();
             if (!traktUserInfo.isSuccessful()) throw new RuntimeException("Trakt OAuth responded with empty username");
 
-            ThirdPartyConnection connection = user.getTraktConnection() != null ? user.getTraktConnection() : new ThirdPartyConnection();
+            ThirdPartyConnection connection = new ThirdPartyConnection();
             connection.setService(ThirdPartyService.TRAKT);
             connection.setAccessToken(response.body().access_token);
             connection.setRefreshToken(response.body().refresh_token);
