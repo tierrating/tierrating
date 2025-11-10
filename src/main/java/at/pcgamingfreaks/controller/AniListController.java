@@ -7,6 +7,7 @@ import at.pcgamingfreaks.model.auth.User;
 import at.pcgamingfreaks.model.dto.AuthTokenResponseDTO;
 import at.pcgamingfreaks.model.dto.ThirdPartyAuthRequestDTO;
 import at.pcgamingfreaks.model.dto.ThirdPartyAuthResponseDTO;
+import at.pcgamingfreaks.model.dto.ThirdPartyInfoResponseDTO;
 import at.pcgamingfreaks.model.repo.UserRepository;
 import at.pcgamingfreaks.model.util.JwtPayload;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +31,7 @@ import java.util.Map;
 @RequestMapping("anilist")
 @CrossOrigin
 @RequiredArgsConstructor
-public class AniListController {
+public class AniListController implements ThirdPartyController{
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
     private final ThirdPartyConfig thirdPartyConfig;
@@ -88,6 +89,15 @@ public class AniListController {
             response.setMessage(e.getMessage());
         }
 
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    @GetMapping("info")
+    public ResponseEntity<ThirdPartyInfoResponseDTO> info() {
+        if (thirdPartyConfig.getAnilistClientKey() == null) return ResponseEntity.notFound().build();
+        ThirdPartyInfoResponseDTO response = new ThirdPartyInfoResponseDTO();
+        response.setClientId(thirdPartyConfig.getAnilistClientKey());
         return ResponseEntity.ok(response);
     }
 
