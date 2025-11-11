@@ -31,8 +31,8 @@ public class SecurityConfiguration {
                 .disable()
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests()
-                .requestMatchers("/auth/change-password").authenticated() // must be before /auth/** wildcard
-                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/auth/signup").permitAll()
+                .requestMatchers("/auth/login").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()
