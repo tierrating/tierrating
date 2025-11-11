@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,5 +38,12 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponseDTO> refresh(@RequestBody RefreshRequestDTO request) {
         return ResponseEntity.ok(authService.refreshToken(request.getToken()));
+    }
+
+    @PostMapping("/change-password")
+    @PreAuthorize("authentication.principal.username == #request.username")
+    public ResponseEntity<ChangePasswordResponseDTO> changePassword(@RequestBody ChangePasswordRequestDTO request) {
+        log.info("Change password request from {}", request.getUsername());
+        return ResponseEntity.ok(authService.changePassword(request));
     }
 }

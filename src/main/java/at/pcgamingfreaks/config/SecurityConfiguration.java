@@ -31,10 +31,9 @@ public class SecurityConfiguration {
                 .disable()
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests()
-                .requestMatchers("/auth/**")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
+                .requestMatchers("/auth/change-password").authenticated() // must be before /auth/** wildcard
+                .requestMatchers("/auth/**").permitAll()
+                .anyRequest().authenticated()
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

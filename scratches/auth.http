@@ -1,3 +1,4 @@
+### Signup
 POST http://localhost:8080/auth/signup
 Content-Type: application/json
 
@@ -7,8 +8,7 @@ Content-Type: application/json
     "password": "arstarst"
 }
 
-###
-
+### Login
 POST http://localhost:8080/auth/login
 Content-Type: application/json
 
@@ -17,5 +17,13 @@ Content-Type: application/json
   "password": "arstarst"
 }
 
-###
+### Change Password
+POST http://localhost:8080/auth/change-password
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJSYXR6ekZhdHp6IiwiaWF0IjoxNzYyODkwNTM1LCJleHAiOjE3NjI4OTQxMzV9.t1g9seJgqn9TpcH-O1gfDz-f4IIuvpJj5dnAvIByqnw
 
+{
+  "username": "RatzzFatzz",
+  "oldPassword": "arstarst",
+  "newPassword": "arstarstarst"
+}
