@@ -59,9 +59,7 @@ public class TmdbCoverFinder {
      * @return cover url
      */
     private String find(String urlExtension, long id, long season) {
-        TmdbCoverCache tmdbCoverCache = season > 0
-                ? tmdbCoverCacheRepository.findByIdAndSeason(id, season).orElse(null)
-                : tmdbCoverCacheRepository.findByIdAndSeason(id, null).orElse(null);
+        TmdbCoverCache tmdbCoverCache = tmdbCoverCacheRepository.findByIdAndSeason(id, season > 0 ? season : null).orElse(null);
         if (tmdbCoverCache != null) return tmdbCoverCache.getCoverUrl();
 
         try {
