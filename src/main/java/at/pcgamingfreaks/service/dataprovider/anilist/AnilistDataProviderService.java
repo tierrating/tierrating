@@ -1,4 +1,4 @@
-package at.pcgamingfreaks.service.dataprovider;
+package at.pcgamingfreaks.service.dataprovider.anilist;
 
 import at.pcgamingfreaks.mapper.ListEntryDtoMapper;
 import at.pcgamingfreaks.model.ContentType;
@@ -8,6 +8,7 @@ import at.pcgamingfreaks.model.anilist.AniListPage;
 import at.pcgamingfreaks.model.auth.User;
 import at.pcgamingfreaks.model.dto.ListEntryDTO;
 import at.pcgamingfreaks.model.repo.UserRepository;
+import at.pcgamingfreaks.service.dataprovider.DataProviderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.graphql.client.HttpGraphQlClient;
@@ -24,9 +25,9 @@ import static at.pcgamingfreaks.config.GlobalProperties.ANILIST_API_URL;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AnilistDataProviderService implements DataProviderService {
+public abstract class AnilistDataProviderService implements DataProviderService {
     private final UserRepository userRepository;
-    private final  ListEntryDtoMapper listEntryDtoMapper;
+    private final ListEntryDtoMapper listEntryDtoMapper;
 
     public ThirdPartyService getService() {
         return ThirdPartyService.ANILIST;
@@ -64,11 +65,11 @@ public class AnilistDataProviderService implements DataProviderService {
 
         List<AniListListEntry> result = new ArrayList<>();
 
-        long timerStart = System.currentTimeMillis();
+        long duration = System.currentTimeMillis();
         AniListPage page;
         int currentPage = 1;
         do {
-            page = createGraphQlClient()
+            page = HttpGraphQlClient.create(WebClient.create(ANILIST_API_URL))
                     .document(query)
                     .variable("userId", user.getAnilistConnection().getThirdpartyUserId())
                     .variable("type", type.name())
@@ -79,17 +80,16 @@ public class AnilistDataProviderService implements DataProviderService {
                     .toEntity(AniListPage.class);
             result.addAll(page.getMediaList());
         } while (page.getPageInfo().isHasNextPage());
-        long requestDuration = System.currentTimeMillis() - timerStart;
-        log.info("Retrieving data from Anilist for {} took {}{}", username,  requestDuration > 1000 ? requestDuration / 1000 : requestDuration, requestDuration > 1000 ? "s" : "ms");
+
+        log.info("Fetched {} {} for {} in {}s",
+                getService(),
+                getContentType(),
+                username,
+                (System.currentTimeMillis() - duration) / 1000);
 
         return result.stream()
                 .map(listEntryDtoMapper::map)
                 .sorted(Comparator.comparing(ListEntryDTO::getScore).reversed())
                 .toList();
-    }
-
-    private HttpGraphQlClient createGraphQlClient() {
-        WebClient webClient = WebClient.create(ANILIST_API_URL);
-        return HttpGraphQlClient.create(webClient);
     }
 }

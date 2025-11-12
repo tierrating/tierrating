@@ -22,6 +22,7 @@ public class TraktTvShowsSeasonsUpdateService extends TraktUpdateService{
 
     @Override
     public void updateData(long id, double score, User user) {
+        if (!thirdPartyConfig.isTraktConfigValid())  throw new RuntimeException("Trakt config is invalid");
         String body = "{\"seasons\":[{\"ids\":{\"trakt\":" + id + "},\"rating\":" + (int) score + "}]}";
         RestClient.builder()
                 .baseUrl("https://api.trakt.tv")

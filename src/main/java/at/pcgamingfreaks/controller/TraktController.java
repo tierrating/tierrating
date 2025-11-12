@@ -40,6 +40,8 @@ public class TraktController implements ThirdPartyController {
     ) {
         log.info("Auth request for {} with code {}", username, requestBody.getCode());
 
+        if (!thirdPartyConfig.isTraktConfigValid()) return ResponseEntity.badRequest().build();
+
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User does not exist"));
         if (user.getTraktConnection() != null) throw new RuntimeException("Already authenticated");
 

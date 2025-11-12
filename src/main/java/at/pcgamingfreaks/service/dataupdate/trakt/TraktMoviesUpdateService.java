@@ -25,6 +25,8 @@ public class TraktMoviesUpdateService extends TraktUpdateService {
 
     @Override
     public void updateData(long id, double score, User user) {
+        if (!thirdPartyConfig.isTraktConfigValid())  throw new RuntimeException("Trakt config is invalid");
+
         try {
             new TraktV2(thirdPartyConfig.getTraktClientKey(), thirdPartyConfig.getTraktClientSecret(), thirdPartyConfig.getTraktRedirectUrl())
                     .accessToken(user.getTraktConnection().getAccessToken())

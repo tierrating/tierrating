@@ -1,5 +1,6 @@
 package at.pcgamingfreaks.controller;
 
+import at.pcgamingfreaks.config.ThirdPartyConfig;
 import at.pcgamingfreaks.model.ContentType;
 import at.pcgamingfreaks.model.ThirdPartyService;
 import at.pcgamingfreaks.model.dto.UpdateScoreRequestDTO;
@@ -40,9 +41,14 @@ public class DataController {
     public ResponseEntity<List<ListEntryDTO>> fetchData(@PathVariable String username,
                                                         @PathVariable ThirdPartyService service,
                                                         @PathVariable ContentType type) {
-        DataProviderService dataProviderService = dataProviderFactory.getProvider(service);
-        if (!dataProviderService.isTypeAllowed(type)) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(dataProviderService.fetchData(username, type));
+        try {
+            DataProviderService dataProviderService = dataProviderFactory.getProvider(service, type);
+            if (dataProviderService == null) return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(dataProviderService.fetchData(username, type));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     /**

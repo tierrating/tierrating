@@ -45,6 +45,8 @@ public class AniListController implements ThirdPartyController{
     ) {
         log.info("Auth request for {}", username);
 
+        if (!thirdPartyConfig.isAnilistConfigValid()) return ResponseEntity.badRequest().build();
+
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User does not exist"));
         if (user.getAnilistConnection() != null) throw new RuntimeException("Already authenticated");
 
