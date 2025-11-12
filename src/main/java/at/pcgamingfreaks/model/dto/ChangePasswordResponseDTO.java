@@ -1,13 +1,8 @@
 package at.pcgamingfreaks.model.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
-@AllArgsConstructor
-public class ChangePasswordResponseDTO {
-    private boolean success;
-    private String message;
+public class ChangePasswordResponseDTO extends GenericResponseDTO {
+    public ChangePasswordResponseDTO(boolean success, String message) {
+        this.success = success;
+        this.message = message;
+    }
 }

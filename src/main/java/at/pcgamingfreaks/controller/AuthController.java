@@ -46,4 +46,11 @@ public class AuthController {
         log.info("Change password request from {}", request.getUsername());
         return ResponseEntity.ok(authService.changePassword(request));
     }
+
+    @PostMapping("/delete-account")
+    @PreAuthorize("authentication.principal.username == #request.username")
+    public ResponseEntity<AccountDeletionResponseDTO> deleteAccount(@RequestBody AccountDeletionRequestDTO request) {
+        log.info("Account deletion request from {}", request.getUsername());
+        return  ResponseEntity.ok(authService.deleteAccount(request));
+    }
 }

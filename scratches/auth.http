@@ -13,7 +13,7 @@ POST http://localhost:8080/auth/login
 Content-Type: application/json
 
 {
-  "username": "RatzzFatzz",
+  "username": "admin",
   "password": "arstarst"
 }
 
@@ -26,4 +26,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJSYXR6ekZhd
   "username": "RatzzFatzz",
   "oldPassword": "arstarst",
   "newPassword": "arstarstarst"
+}
+
+### Delete account
+POST http://localhost:8080/auth/delete-account
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc2MjkwOTc0MiwiZXhwIjoxNzYyOTEzMzQyfQ.yap8-DEeV5Bn4TXpihySLVeujJblDc5LXWnd88qrhXM
+
+{
+  "username": "admin"
 }

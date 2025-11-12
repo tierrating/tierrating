@@ -4,6 +4,7 @@ import at.pcgamingfreaks.model.auth.User;
 import at.pcgamingfreaks.model.dto.*;
 import at.pcgamingfreaks.model.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class AuthService {
@@ -77,6 +79,19 @@ public class AuthService {
             return new ChangePasswordResponseDTO(true, "");
         } catch (AuthenticationException e) {
             return new ChangePasswordResponseDTO(false, "Invalid credentials");
+        }
+    }
+
+    public AccountDeletionResponseDTO deleteAccount(AccountDeletionRequestDTO request) {
+        Optional<User> user = userRepository.findByUsername(request.getUsername());
+        if (user.isEmpty()) return new AccountDeletionResponseDTO(false, "Unknown user");
+
+        try {
+            userRepository.delete(user.get());
+            log.info("Deleted {} successfully", user.get().getUsername());
+            return new AccountDeletionResponseDTO(true, "");
+        } catch (Exception ex) {
+            return new AccountDeletionResponseDTO(false, "Deletion failed");
         }
     }
 }
