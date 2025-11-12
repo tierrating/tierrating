@@ -6,7 +6,7 @@ import at.pcgamingfreaks.model.auth.ThirdPartyConnection;
 import at.pcgamingfreaks.model.auth.User;
 import at.pcgamingfreaks.model.dto.ThirdPartyAuthRequestDTO;
 import at.pcgamingfreaks.model.dto.ThirdPartyAuthResponseDTO;
-import at.pcgamingfreaks.model.repo.ThirdpartyConnectionRepository;
+import at.pcgamingfreaks.model.dto.ThirdPartyInfoResponseDTO;
 import at.pcgamingfreaks.model.repo.UserRepository;
 import com.uwetrottmann.trakt5.TraktV2;
 import com.uwetrottmann.trakt5.entities.AccessToken;
@@ -27,9 +27,8 @@ import java.time.LocalDateTime;
 @RequestMapping("trakt")
 @CrossOrigin
 @RequiredArgsConstructor
-public class TraktController {
+public class TraktController implements ThirdPartyController {
     private final UserRepository userRepository;
-    private final ThirdpartyConnectionRepository thirdpartyConnectionRepository;
     private final ThirdPartyConfig thirdPartyConfig;
 
     @PostMapping("auth/{username}")
@@ -41,8 +40,10 @@ public class TraktController {
     ) {
         log.info("Auth request for {} with code {}", username, requestBody.getCode());
 
+        if (!thirdPartyConfig.isTraktConfigValid()) return ResponseEntity.badRequest().build();
+
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User does not exist"));
-        if (user.getAnilistConnection() != null) throw new RuntimeException("Already authenticated");
+        if (user.getTraktConnection() != null) throw new RuntimeException("Already authenticated");
 
         ThirdPartyAuthResponseDTO responseDto = new ThirdPartyAuthResponseDTO();
         try {
@@ -53,7 +54,7 @@ public class TraktController {
             Response<com.uwetrottmann.trakt5.entities.User> traktUserInfo = trakt.accessToken(response.body().access_token).users().profile(UserSlug.ME, Extended.METADATA).execute();
             if (!traktUserInfo.isSuccessful()) throw new RuntimeException("Trakt OAuth responded with empty username");
 
-            ThirdPartyConnection connection = user.getTraktConnection();
+            ThirdPartyConnection connection = new ThirdPartyConnection();
             connection.setService(ThirdPartyService.TRAKT);
             connection.setAccessToken(response.body().access_token);
             connection.setRefreshToken(response.body().refresh_token);
@@ -66,5 +67,14 @@ public class TraktController {
             responseDto.setMessage(e.getMessage());
         }
         return ResponseEntity.ok(responseDto);
+    }
+
+    @Override
+    @GetMapping("info")
+    public ResponseEntity<ThirdPartyInfoResponseDTO> info() {
+        if (thirdPartyConfig.getTraktClientKey() ==  null) return ResponseEntity.notFound().build();
+        ThirdPartyInfoResponseDTO response = new ThirdPartyInfoResponseDTO();
+        response.setClientId(thirdPartyConfig.getTraktClientKey());
+        return ResponseEntity.ok(response);
     }
 }

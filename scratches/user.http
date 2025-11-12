@@ -1,0 +1,6 @@
+### Remove third-party connection
+POST http://localhost:8080/user/RatzzFatzz/remove/anilist
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJSYXR6ekZhdHp6IiwiaWF0IjoxNzYyOTQ5NjM3LCJleHAiOjE3NjI5NTMyMzd9.oDxv9cih_hCj2K6sOFim74O_yKF2JWWMVz9k5SuN9uA
+
+###
