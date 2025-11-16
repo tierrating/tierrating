@@ -22,7 +22,7 @@ public class ConfigController {
     private final Pattern configValidPattern = Pattern.compile("is(?<service>.*)ConfigValid");
 
     @GetMapping("services")
-    public ResponseEntity<List<ThirdPartyService>> getAvailableServices() {
+    public ResponseEntity<List<String>> getAvailableServices() {
         List<ThirdPartyService> services = new ArrayList<>();
         Method[] methods = thirdPartyConfig.getClass().getMethods();
         for (Method method:  methods) {
@@ -31,7 +31,7 @@ public class ConfigController {
                 services.add(ThirdPartyService.from(matcher.group("service")));
             }
         }
-        return ResponseEntity.ok(services);
+        return ResponseEntity.ok(services.stream().map(s -> s.name().toLowerCase()).toList());
     }
 }
 
