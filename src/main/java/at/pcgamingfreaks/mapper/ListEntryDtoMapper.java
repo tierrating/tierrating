@@ -5,10 +5,7 @@ import at.pcgamingfreaks.model.anilist.AniListMediaCoverImage;
 import at.pcgamingfreaks.model.anilist.AniListMediaTitle;
 import at.pcgamingfreaks.model.dto.ListEntryDTO;
 import at.pcgamingfreaks.service.TmdbCoverFinder;
-import com.uwetrottmann.trakt5.entities.BaseRatedEntity;
-import com.uwetrottmann.trakt5.entities.RatedMovie;
-import com.uwetrottmann.trakt5.entities.RatedSeason;
-import com.uwetrottmann.trakt5.entities.RatedShow;
+import com.uwetrottmann.trakt5.entities.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
@@ -43,7 +40,7 @@ public class ListEntryDtoMapper {
         throw new RuntimeException("Invalid entry type");
     }
 
-    private ListEntryDTO map(RatedMovie entry) {
+    public ListEntryDTO map(RatedMovie entry) {
         ListEntryDTO dto = new ListEntryDTO();
         dto.setId(entry.movie.ids.trakt);
         dto.setTitle(entry.movie.title);
@@ -52,12 +49,30 @@ public class ListEntryDtoMapper {
         return dto;
     }
 
-    private ListEntryDTO map(RatedShow entry) {
+    public ListEntryDTO map(BaseMovie entry) {
+        ListEntryDTO dto = new ListEntryDTO();
+        dto.setId(entry.movie.ids.trakt);
+        dto.setTitle(entry.movie.title);
+        dto.setCover(tmdbCoverFinder.findMovie(entry.movie.ids.tmdb));
+        dto.setScore(0);
+        return dto;
+    }
+
+    public ListEntryDTO map(RatedShow entry) {
         ListEntryDTO dto = new ListEntryDTO();
         dto.setId(entry.show.ids.trakt);
         dto.setTitle(entry.show.title);
         dto.setCover(tmdbCoverFinder.findShow(entry.show.ids.tmdb));
         dto.setScore(entry.rating.value);
+        return dto;
+    }
+
+    public ListEntryDTO map(BaseShow entry) {
+        ListEntryDTO dto = new ListEntryDTO();
+        dto.setId(entry.show.ids.trakt);
+        dto.setTitle(entry.show.title);
+        dto.setCover(tmdbCoverFinder.findShow(entry.show.ids.tmdb));
+        dto.setScore(0);
         return dto;
     }
 

@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -50,6 +52,17 @@ public abstract class TraktDataProviderService implements DataProviderService {
         }
     }
 
-    protected abstract Stream<ListEntryDTO> fetch(User user) throws IOException;
+    protected Stream<ListEntryDTO> fetch(User user) throws IOException {
+        Map<Long, ListEntryDTO> result = new HashMap<>();
+        fetchRated(user).forEach(entry -> result.put(entry.getId(), entry));
+        fetchWatched(user).forEach(entry -> {
+            if (!result.containsKey(entry.getId())) result.put(entry.getId(), entry);
+        });
+        return result.values().stream();
+    }
+
+    abstract protected List<ListEntryDTO> fetchRated(User user) throws IOException;
+
+    abstract protected List<ListEntryDTO> fetchWatched(User user) throws IOException;
 
 }
