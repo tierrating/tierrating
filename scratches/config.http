@@ -1,0 +1,4 @@
+### Get available services
+GET http://localhost:8080/config/services
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJSYXR6ekZhdHp6IiwiaWF0IjoxNzYzMjQ5NDk1LCJleHAiOjE3NjMyNTMwOTV9.7TfhOMpDlkaRdBdt5TJQ2DBQadjnWAqpLLSS2Xof5Aw
+

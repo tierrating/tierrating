@@ -7,6 +7,7 @@ import at.pcgamingfreaks.model.auth.User;
 import at.pcgamingfreaks.model.dto.ListEntryDTO;
 import at.pcgamingfreaks.model.repo.UserRepository;
 import com.uwetrottmann.trakt5.TraktV2;
+import com.uwetrottmann.trakt5.entities.BaseShow;
 import com.uwetrottmann.trakt5.entities.RatedShow;
 import com.uwetrottmann.trakt5.entities.UserSlug;
 import com.uwetrottmann.trakt5.enums.Extended;
@@ -16,7 +17,6 @@ import retrofit2.Response;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 public class TraktTvShowDataProvider extends TraktDataProviderService {
@@ -31,7 +31,7 @@ public class TraktTvShowDataProvider extends TraktDataProviderService {
     }
 
     @Override
-    protected Stream<ListEntryDTO> fetch(User user) throws IOException {
+    protected List<ListEntryDTO> fetchRated(User user) throws IOException {
         Response<List<RatedShow>> response = new TraktV2(
                         thirdPartyConfig.getTraktClientKey(),
                         thirdPartyConfig.getTraktClientSecret(),
@@ -40,13 +40,34 @@ public class TraktTvShowDataProvider extends TraktDataProviderService {
                 .ratingsShows(
                         UserSlug.fromUsername(user.getTraktConnection().getThirdpartyUserId()),
                         RatingsFilter.ALL,
-                        Extended.FULL)
+                        Extended.NOSEASONS)
                 .execute();
 
         if (!response.isSuccessful())
             throw new RuntimeException("Error retrieving watched movies of " + user.getUsername());
 
         return response.body().stream()
-                .map(listEntryDtoMapper::map);
+                .map(listEntryDtoMapper::map)
+                .toList();
+    }
+
+    @Override
+    protected List<ListEntryDTO> fetchWatched(User user) throws IOException {
+        Response<List<BaseShow>> response = new TraktV2(
+                thirdPartyConfig.getTraktClientKey(),
+                thirdPartyConfig.getTraktClientSecret(),
+                thirdPartyConfig.getTraktRedirectUrl())
+                .users()
+                .watchedShows(
+                        UserSlug.fromUsername(user.getTraktConnection().getThirdpartyUserId()),
+                        Extended.NOSEASONS)
+                .execute();
+
+        if (!response.isSuccessful())
+            throw new RuntimeException("Error retrieving watched movies of " + user.getUsername());
+
+        return response.body().stream()
+                .map(listEntryDtoMapper::map)
+                .toList();
     }
 }

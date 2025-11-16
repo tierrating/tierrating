@@ -35,7 +35,7 @@ public class TmdbCoverFinder {
      * @return cover url
      */
     public String findShow(long id) {
-        return find("/show/%d", id, 0);
+        return find("/tv/%d", id, 0);
     }
 
     /**
@@ -77,11 +77,12 @@ public class TmdbCoverFinder {
 
             tmdbCoverCache = new TmdbCoverCache();
             tmdbCoverCache.setId(id);
+            if (season > 0) tmdbCoverCache.setSeason(season);
             tmdbCoverCache.setCoverUrl(TMDB_IMAGE_API_URL + response.getPosterPath());
             tmdbCoverCacheRepository.save(tmdbCoverCache);
             return tmdbCoverCache.getCoverUrl();
         } catch (Exception e) {
-            log.warn("", e);
+            log.warn("Couldn't find image for {}: {}", urlExtension.formatted(id), e.getMessage());
             return null;
         }
     }
