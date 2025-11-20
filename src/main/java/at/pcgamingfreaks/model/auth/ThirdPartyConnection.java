@@ -18,7 +18,7 @@ public class ThirdPartyConnection {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private ThirdPartyService service;
     private String thirdpartyUserId;
 
