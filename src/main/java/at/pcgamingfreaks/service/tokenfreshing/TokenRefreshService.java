@@ -14,16 +14,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TokenRefreshService {
     private final UserRepository userRepository;
-    private final AnilistTokenRefresher anilistTokenRefresher;
     private final TraktTokenRefresher traktTokenRefresher;
 
-    @Scheduled(cron = "* 59 22 * * *")
+    @Scheduled(cron = "0 ${random.int[0,59]} 0 * * *")
     public void refreshTokens() {
         List<User> users = userRepository.findAll();
 
         for (User user: users) {
             if (user.getTraktConnection() != null && traktTokenRefresher.isValid()) traktTokenRefresher.refresh(user);
-            if (user.getAnilistConnection() != null && anilistTokenRefresher.isValid()) anilistTokenRefresher.refresh(user);
         }
         log.info("Refreshed tokens");
     }
