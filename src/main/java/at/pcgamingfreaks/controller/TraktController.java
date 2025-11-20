@@ -40,14 +40,14 @@ public class TraktController implements ThirdPartyController {
     ) {
         log.info("Auth request for {} with code {}", username, requestBody.getCode());
 
-        if (!thirdPartyConfig.isTraktConfigValid()) return ResponseEntity.badRequest().build();
+        if (!thirdPartyConfig.getTrakt().isValid()) return ResponseEntity.badRequest().build();
 
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User does not exist"));
         if (user.getTraktConnection() != null) throw new RuntimeException("Already authenticated");
 
         ThirdPartyAuthResponseDTO responseDto = new ThirdPartyAuthResponseDTO();
         try {
-            TraktV2 trakt = new TraktV2(thirdPartyConfig.getTraktClientKey(), thirdPartyConfig.getTraktClientSecret(), thirdPartyConfig.getTraktRedirectUrl());
+            TraktV2 trakt = new TraktV2(thirdPartyConfig.getTrakt().getClient().getKey(), thirdPartyConfig.getTrakt().getClient().getSecret(), thirdPartyConfig.getTrakt().getRedirectUrl());
             Response<AccessToken> response = trakt.exchangeCodeForAccessToken(requestBody.getCode());
             if (!response.isSuccessful()) throw new RuntimeException("Trakt OAuth responded with empty body");
 
@@ -72,9 +72,9 @@ public class TraktController implements ThirdPartyController {
     @Override
     @GetMapping("info")
     public ResponseEntity<ThirdPartyInfoResponseDTO> info() {
-        if (thirdPartyConfig.getTraktClientKey() ==  null) return ResponseEntity.notFound().build();
+        if (!thirdPartyConfig.getTrakt().isValid()) return ResponseEntity.notFound().build();
         ThirdPartyInfoResponseDTO response = new ThirdPartyInfoResponseDTO();
-        response.setClientId(thirdPartyConfig.getTraktClientKey());
+        response.setClientId(thirdPartyConfig.getTrakt().getClient().getKey());
         return ResponseEntity.ok(response);
     }
 }

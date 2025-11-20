@@ -33,9 +33,9 @@ public class TraktTvShowSeasonsDataProvider extends TraktDataProviderService{
     @Override
     protected List<ListEntryDTO> fetchRated(User user) throws IOException {
         Response<List<RatedSeason>> response = new TraktV2(
-                        thirdPartyConfig.getTraktClientKey(),
-                        thirdPartyConfig.getTraktClientSecret(),
-                        thirdPartyConfig.getTraktRedirectUrl())
+                thirdPartyConfig.getTrakt().getClient().getKey(),
+                thirdPartyConfig.getTrakt().getClient().getSecret(),
+                thirdPartyConfig.getTrakt().getRedirectUrl())
                 .users()
                 .ratingsSeasons(
                         UserSlug.fromUsername(user.getTraktConnection().getThirdpartyUserId()),

@@ -22,7 +22,7 @@ public class TraktTvShowsSeasonsUpdateService extends TraktUpdateService{
 
     @Override
     public void updateData(long id, double score, User user) {
-        if (!thirdPartyConfig.isTraktConfigValid())  throw new RuntimeException("Trakt config is invalid");
+        if (!thirdPartyConfig.getTrakt().isValid())  throw new RuntimeException("Trakt config is invalid");
         String body = "{\"seasons\":[{\"ids\":{\"trakt\":" + id + "},\"rating\":" + (int) score + "}]}";
         RestClient.builder()
                 .baseUrl("https://api.trakt.tv")
@@ -31,7 +31,7 @@ public class TraktTvShowsSeasonsUpdateService extends TraktUpdateService{
                 .post()
                 .uri("/sync/ratings")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("trakt-api-key", thirdPartyConfig.getTraktClientKey())
+                .header("trakt-api-key", thirdPartyConfig.getTrakt().getClient().getKey())
                 .body(body)
                 .retrieve()
                 .body(String.class);

@@ -22,7 +22,7 @@ public class AnilistTokenRefresher implements TokenRefresher {
 
     @Override
     public boolean isValid() {
-        return thirdPartyConfig.isAnilistConfigValid();
+        return thirdPartyConfig.getAnilist().isValid();
     }
 
     @Override

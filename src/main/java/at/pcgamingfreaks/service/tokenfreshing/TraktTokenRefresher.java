@@ -23,7 +23,7 @@ public class TraktTokenRefresher implements TokenRefresher{
 
     @Override
     public boolean isValid() {
-        return thirdPartyConfig.isTraktConfigValid();
+        return thirdPartyConfig.getTrakt().isValid();
     }
 
     @Override
@@ -31,7 +31,7 @@ public class TraktTokenRefresher implements TokenRefresher{
         ThirdPartyConnection connection = user.getTraktConnection();
         if (connection.getExpiresOn().isBefore(LocalDateTime.now().plusDays(2))) {
             try {
-                TraktV2 trakt = new TraktV2(thirdPartyConfig.getTraktClientKey(), thirdPartyConfig.getTraktClientSecret(), thirdPartyConfig.getTraktRedirectUrl());
+                TraktV2 trakt = new TraktV2(thirdPartyConfig.getTrakt().getClient().getKey(), thirdPartyConfig.getTrakt().getClient().getSecret(), thirdPartyConfig.getTrakt().getRedirectUrl());
                 Response<AccessToken> response = trakt.refreshAccessToken(connection.getRefreshToken());
 
                 if (!response.isSuccessful()) throw new RuntimeException("Refreshing trakt access token failed");

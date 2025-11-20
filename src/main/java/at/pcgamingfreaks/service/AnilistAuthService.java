@@ -19,9 +19,9 @@ public class AnilistAuthService {
     public AuthTokenResponseDTO auth(String code) {
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("grant_type", "authorization_code");
-        requestBody.put("client_id", thirdPartyConfig.getAnilistClientKey());
-        requestBody.put("client_secret", thirdPartyConfig.getAnilistClientSecret());
-        requestBody.put("redirect_uri", thirdPartyConfig.getAnilistRedirectUrl());
+        requestBody.put("client_id", thirdPartyConfig.getAnilist().getClient().getKey());
+        requestBody.put("client_secret", thirdPartyConfig.getAnilist().getClient().getSecret());
+        requestBody.put("redirect_uri", thirdPartyConfig.getAnilist().getRedirectUrl());
         requestBody.put("code", code);
 
         RestTemplate restTemplate = new RestTemplate();

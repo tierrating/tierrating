@@ -43,7 +43,7 @@ public class AniListController implements ThirdPartyController {
     ) {
         log.info("Auth request for {}", username);
 
-        if (!thirdPartyConfig.isAnilistConfigValid()) return ResponseEntity.badRequest().build();
+        if (!thirdPartyConfig.getAnilist().isValid()) return ResponseEntity.badRequest().build();
 
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User does not exist"));
         if (user.getAnilistConnection() != null) throw new RuntimeException("Already authenticated");
@@ -73,9 +73,9 @@ public class AniListController implements ThirdPartyController {
     @Override
     @GetMapping("info")
     public ResponseEntity<ThirdPartyInfoResponseDTO> info() {
-        if (thirdPartyConfig.getAnilistClientKey() == null) return ResponseEntity.notFound().build();
+        if (!thirdPartyConfig.getAnilist().isValid()) return ResponseEntity.notFound().build();
         ThirdPartyInfoResponseDTO response = new ThirdPartyInfoResponseDTO();
-        response.setClientId(thirdPartyConfig.getAnilistClientKey());
+        response.setClientId(thirdPartyConfig.getAnilist().getClient().getKey());
         return ResponseEntity.ok(response);
     }
 
