@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @Service
@@ -21,7 +22,7 @@ public class JwtService {
         return JWT.create()
                 .withSubject(username)
                 .withIssuedAt(Date.from(Instant.now()))
-                .withExpiresAt(Date.from(Instant.now().plusSeconds(3600)))
+                .withExpiresAt(Date.from(Instant.now().plus(60, ChronoUnit.MINUTES)))
                 .sign(algorithm);
     }
 
