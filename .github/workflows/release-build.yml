@@ -1,6 +1,6 @@
 # This workflow will run every time a new release is created.
 
-name: Release Build
+name: Server Release Build
 
 on:
   push:

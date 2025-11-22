@@ -1,6 +1,5 @@
 package at.pcgamingfreaks.controller;
 
-import at.pcgamingfreaks.config.ThirdPartyConfig;
 import at.pcgamingfreaks.model.ContentType;
 import at.pcgamingfreaks.model.ThirdPartyService;
 import at.pcgamingfreaks.model.dto.UpdateScoreRequestDTO;

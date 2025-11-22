@@ -1,8 +1,24 @@
 # TierRating
-![Release Build Status](https://github.com/RatzzFatzz/tierrating/workflows/release-build/badge.svg)
+[![Server Release Build](https://github.com/tierrating/tierrating/actions/workflows/release-build.yml/badge.svg)](https://github.com/tierrating/tierrating/actions/workflows/release-build.yml)
+[![UI Release Build](https://github.com/tierrating/tierrating-ui/actions/workflows/release-build.yml/badge.svg)](https://github.com/tierrating/tierrating-ui/actions/workflows/release-build.yml)
 
-Go to [tierrating-ui](https://github.com/RatzzFatzz/tierrating-ui) for deployment and more information.
 
+Fetch ratings from third-party providers like Anilist and organize them in tier lists. Changes will be synced back to the provider.
+
+## Overview
+* Import your ratings from Anilist and Trakt
+* View and organize your content in tier lists
+* Sync rating changes back to the original platform
+* Fully selfhostable
+
+## Screenshots
+
+![anilist-anime-tierlist](screenshots/anilist-anime-tierlist.png)
+You can find more screenshots [here](https://github.com/tierrating/tierrating/tree/master/screenshots).
+
+## Installation
+
+Installation guide is available at [tierrating docs](https://docs.tierrating.de/docs/installation/).
 
 ## Development
 
@@ -17,7 +33,7 @@ This repository contains the backend service for TierRating, a Spring Boot appli
 
 1. Clone the repository
 ```bash
-git clone https://github.com/RatzzFatzz/tierrating.git
+git clone https://github.com/tierrating/tierrating.git
 cd tierrating
 ```
 
@@ -33,34 +49,8 @@ mvn spring-boot:run
 
 The API will be available at http://localhost:8080
 
-### Project Structure
-
-This is a standard Spring Boot application:
-
-- `/src/main/java` - Java source code
-- `/src/main/resources` - Configuration files and static resources
-- `/src/test` - Test classes
-
-### Building for Production
-
-```bash
-mvn clean package
-```
-
-This will generate a JAR file in the `/target` directory.
-
-### Docker Build (Optional)
-
-If you want to build the Docker image locally:
+#### Docker Build (Optional)
 
 ```bash
 docker build -t tierrating:latest .
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request

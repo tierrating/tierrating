@@ -33,9 +33,9 @@ public class TraktTvShowDataProvider extends TraktDataProviderService {
     @Override
     protected List<ListEntryDTO> fetchRated(User user) throws IOException {
         Response<List<RatedShow>> response = new TraktV2(
-                        thirdPartyConfig.getTraktClientKey(),
-                        thirdPartyConfig.getTraktClientSecret(),
-                        thirdPartyConfig.getTraktRedirectUrl())
+                    thirdPartyConfig.getTrakt().getClient().getKey(),
+                    thirdPartyConfig.getTrakt().getClient().getSecret(),
+                    thirdPartyConfig.getTrakt().getRedirectUrl())
                 .users()
                 .ratingsShows(
                         UserSlug.fromUsername(user.getTraktConnection().getThirdpartyUserId()),
@@ -54,9 +54,9 @@ public class TraktTvShowDataProvider extends TraktDataProviderService {
     @Override
     protected List<ListEntryDTO> fetchWatched(User user) throws IOException {
         Response<List<BaseShow>> response = new TraktV2(
-                thirdPartyConfig.getTraktClientKey(),
-                thirdPartyConfig.getTraktClientSecret(),
-                thirdPartyConfig.getTraktRedirectUrl())
+                    thirdPartyConfig.getTrakt().getClient().getKey(),
+                    thirdPartyConfig.getTrakt().getClient().getSecret(),
+                    thirdPartyConfig.getTrakt().getRedirectUrl())
                 .users()
                 .watchedShows(
                         UserSlug.fromUsername(user.getTraktConnection().getThirdpartyUserId()),

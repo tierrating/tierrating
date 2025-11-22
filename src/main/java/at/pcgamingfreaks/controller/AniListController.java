@@ -10,31 +10,29 @@ import at.pcgamingfreaks.model.dto.ThirdPartyAuthResponseDTO;
 import at.pcgamingfreaks.model.dto.ThirdPartyInfoResponseDTO;
 import at.pcgamingfreaks.model.repo.UserRepository;
 import at.pcgamingfreaks.model.util.JwtPayload;
+import at.pcgamingfreaks.service.AnilistAuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("anilist")
 @CrossOrigin
 @RequiredArgsConstructor
-public class AniListController implements ThirdPartyController{
+public class AniListController implements ThirdPartyController {
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
     private final ThirdPartyConfig thirdPartyConfig;
+    private final AnilistAuthService anilistAuthService;
 
     @PostMapping("auth/{username}")
     @PreAuthorize("authentication.principal.username == #username")
@@ -45,47 +43,25 @@ public class AniListController implements ThirdPartyController{
     ) {
         log.info("Auth request for {}", username);
 
-        if (!thirdPartyConfig.isAnilistConfigValid()) return ResponseEntity.badRequest().build();
+        if (!thirdPartyConfig.getAnilist().isValid()) return ResponseEntity.badRequest().build();
 
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User does not exist"));
         if (user.getAnilistConnection() != null) throw new RuntimeException("Already authenticated");
 
-        Map<String, String> requestBody = new HashMap<>();
-        requestBody.put("grant_type", "authorization_code");
-        requestBody.put("client_id", thirdPartyConfig.getAnilistClientKey());
-        requestBody.put("client_secret", thirdPartyConfig.getAnilistClientSecret());
-        requestBody.put("redirect_uri", thirdPartyConfig.getAnilistRedirectUrl());
-        requestBody.put("code", request.getCode());
-
-        RestTemplate restTemplate = new RestTemplate();
         ThirdPartyAuthResponseDTO response = new ThirdPartyAuthResponseDTO();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-
-        HttpEntity<Map<String, String>> entity = new HttpEntity<>(requestBody, headers);
-
         try {
-            ResponseEntity<AuthTokenResponseDTO> tokenResponse = restTemplate.exchange(
-                    "https://anilist.co/api/v2/oauth/token",
-                    HttpMethod.POST,
-                    entity,
-                    AuthTokenResponseDTO.class
-            );
 
-            if (!tokenResponse.hasBody() || tokenResponse.getBody() == null)
-                throw new RuntimeException("AniList OAuth responded with empty body");
+            AuthTokenResponseDTO tokenResponse = anilistAuthService.auth(request.getCode());
 
             ThirdPartyConnection connection = new ThirdPartyConnection();
             connection.setService(ThirdPartyService.ANILIST);
-            connection.setAccessToken(tokenResponse.getBody().getAccessToken());
-            connection.setRefreshToken(tokenResponse.getBody().getRefreshToken());
-            connection.setExpiresOn(LocalDateTime.now().plusSeconds(tokenResponse.getBody().getExpiresIn()));
+            connection.setAccessToken(tokenResponse.getAccessToken());
+            connection.setRefreshToken(tokenResponse.getRefreshToken());
+            connection.setExpiresOn(LocalDateTime.now().plusSeconds(tokenResponse.getExpiresIn()));
             connection.setThirdpartyUserId(String.valueOf(extractUserIdFrom(connection.getAccessToken())));
             user.setAnilistConnection(connection);
             userRepository.save(user);
-
         } catch (Exception e) {
             log.error("", e);
             response.setMessage(e.getMessage());
@@ -97,9 +73,9 @@ public class AniListController implements ThirdPartyController{
     @Override
     @GetMapping("info")
     public ResponseEntity<ThirdPartyInfoResponseDTO> info() {
-        if (thirdPartyConfig.getAnilistClientKey() == null) return ResponseEntity.notFound().build();
+        if (!thirdPartyConfig.getAnilist().isValid()) return ResponseEntity.notFound().build();
         ThirdPartyInfoResponseDTO response = new ThirdPartyInfoResponseDTO();
-        response.setClientId(thirdPartyConfig.getAnilistClientKey());
+        response.setClientId(thirdPartyConfig.getAnilist().getClient().getKey());
         return ResponseEntity.ok(response);
     }
 
