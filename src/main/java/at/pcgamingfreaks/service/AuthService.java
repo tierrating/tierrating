@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -67,19 +68,13 @@ public class AuthService {
         return new LoginResponseDTO(refreshedToken);
     }
 
-    public ChangePasswordResponseDTO changePassword(ChangePasswordRequestDTO request) {
+    public void changePassword(ChangePasswordRequestDTO request) {
         Optional<User> user = userRepository.findByUsername(request.getUsername());
-        if (user.isEmpty()) return new ChangePasswordResponseDTO(false, "Unknown user");
+        if (user.isEmpty()) throw new UsernameNotFoundException(request.getUsername());
 
-        try {
-            Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getOldPassword()));
-            if (!auth.isAuthenticated()) return new ChangePasswordResponseDTO(false, "Invalid credentials");
-            user.get().setPassword(passwordEncoder.encode(request.getNewPassword()));
-            userRepository.save(user.get());
-            return new ChangePasswordResponseDTO(true, "");
-        } catch (AuthenticationException e) {
-            return new ChangePasswordResponseDTO(false, "Invalid credentials");
-        }
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getOldPassword()));
+        user.get().setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user.get());
     }
 
     public AccountDeletionResponseDTO deleteAccount(AccountDeletionRequestDTO request) {

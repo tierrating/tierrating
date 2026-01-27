@@ -40,14 +40,9 @@ public class DataController {
     public ResponseEntity<List<ListEntryDTO>> fetchData(@PathVariable String username,
                                                         @PathVariable ThirdPartyService service,
                                                         @PathVariable ContentType type) {
-        try {
-            DataProviderService dataProviderService = dataProviderFactory.getProvider(service, type);
-            if (dataProviderService == null) return ResponseEntity.notFound().build();
-            return ResponseEntity.ok(dataProviderService.fetchData(username, type));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        DataProviderService dataProviderService = dataProviderFactory.getProvider(service, type);
+        if (dataProviderService == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(dataProviderService.fetchData(username, type));
     }
 
     /**
@@ -63,12 +58,7 @@ public class DataController {
             return ResponseEntity.notFound().build();
         }
 
-        try {
-            dataUpdateFactory.getProvider(request.getService(), request.getType()).updateData(request.getId(), request.getScore(), user.get());
-            return ResponseEntity.ok(UpdateScoreResponseDTO.success());
-        }  catch (Exception e) {
-            log.error("Failed updating score for {}", user.get().getUsername(), e);
-            return ResponseEntity.badRequest().build();
-        }
+        dataUpdateFactory.getProvider(request.getService(), request.getType()).updateData(request.getId(), request.getScore(), user.get());
+        return ResponseEntity.ok(UpdateScoreResponseDTO.success());
     }
 }
