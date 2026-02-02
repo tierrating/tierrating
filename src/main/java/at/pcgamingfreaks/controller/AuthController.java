@@ -22,11 +22,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO request) {
         log.info("Login request from {}", request.getUsername());
-        try {
-            return ResponseEntity.ok(authService.authenticate(request.getUsername(), request.getPassword()));
-        } catch (Exception ignored) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        return ResponseEntity.ok(authService.authenticate(request.getUsername(), request.getPassword()));
     }
 
     @PostMapping("/signup")
@@ -42,15 +38,15 @@ public class AuthController {
 
     @PostMapping("/change-password")
     @PreAuthorize("authentication.principal.username == #request.username")
-    public ResponseEntity<ChangePasswordResponseDTO> changePassword(@RequestBody ChangePasswordRequestDTO request) {
+    public void changePassword(@RequestBody ChangePasswordRequestDTO request) {
         log.info("Change password request from {}", request.getUsername());
-        return ResponseEntity.ok(authService.changePassword(request));
+        authService.changePassword(request);
     }
 
     @PostMapping("/delete-account")
     @PreAuthorize("authentication.principal.username == #request.username")
-    public ResponseEntity<AccountDeletionResponseDTO> deleteAccount(@RequestBody AccountDeletionRequestDTO request) {
+    public void deleteAccount(@RequestBody AccountDeletionRequestDTO request) {
         log.info("Account deletion request from {}", request.getUsername());
-        return  ResponseEntity.ok(authService.deleteAccount(request));
+        authService.deleteAccount(request);
     }
 }
