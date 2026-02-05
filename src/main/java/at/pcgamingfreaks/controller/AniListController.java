@@ -6,8 +6,9 @@ import at.pcgamingfreaks.model.auth.ThirdPartyConnection;
 import at.pcgamingfreaks.model.auth.User;
 import at.pcgamingfreaks.model.dto.AuthTokenResponseDTO;
 import at.pcgamingfreaks.model.dto.ThirdPartyAuthRequestDTO;
-import at.pcgamingfreaks.model.dto.ThirdPartyAuthResponseDTO;
 import at.pcgamingfreaks.model.dto.ThirdPartyInfoResponseDTO;
+import at.pcgamingfreaks.model.exceptions.ThirdPartyAuthenticationException;
+import at.pcgamingfreaks.model.exceptions.ThirdPartyUnconfiguredException;
 import at.pcgamingfreaks.model.repo.UserRepository;
 import at.pcgamingfreaks.model.util.JwtPayload;
 import at.pcgamingfreaks.service.AnilistAuthService;
@@ -37,18 +38,16 @@ public class AniListController implements ThirdPartyController {
     @PostMapping("auth/{username}")
     @PreAuthorize("authentication.principal.username == #username")
     @Validated
-    public ResponseEntity<ThirdPartyAuthResponseDTO> auth(
+    public void auth(
             @PathVariable String username,
             @RequestBody ThirdPartyAuthRequestDTO request
     ) {
         log.info("Auth request for {}", username);
 
-        if (!thirdPartyConfig.getAnilist().isValid()) return ResponseEntity.badRequest().build();
+        if (!thirdPartyConfig.getAnilist().isValid()) throw new ThirdPartyUnconfiguredException(ThirdPartyService.ANILIST);
 
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User does not exist"));
         if (user.getAnilistConnection() != null) throw new RuntimeException("Already authenticated");
-
-        ThirdPartyAuthResponseDTO response = new ThirdPartyAuthResponseDTO();
 
         try {
 
@@ -63,11 +62,8 @@ public class AniListController implements ThirdPartyController {
             user.setAnilistConnection(connection);
             userRepository.save(user);
         } catch (Exception e) {
-            log.error("", e);
-            response.setMessage(e.getMessage());
+            throw new ThirdPartyAuthenticationException(e);
         }
-
-        return ResponseEntity.ok(response);
     }
 
     @Override

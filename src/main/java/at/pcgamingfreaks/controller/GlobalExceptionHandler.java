@@ -1,6 +1,7 @@
 package at.pcgamingfreaks.controller;
 
 import at.pcgamingfreaks.model.dto.ErrorResponseDTO;
+import at.pcgamingfreaks.model.exceptions.ThirdPartyAuthenticationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,5 +29,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponseDTO> handleAuthenticationException(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponseDTO("Invalid credentials"));
+    }
+
+    @ExceptionHandler(ThirdPartyAuthenticationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleThirdPartyAuthenticationException(ThirdPartyAuthenticationException ex) {
+        return ResponseEntity.internalServerError().body(new ErrorResponseDTO(""));
     }
 }

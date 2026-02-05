@@ -7,6 +7,8 @@ import at.pcgamingfreaks.model.auth.User;
 import at.pcgamingfreaks.model.dto.ThirdPartyAuthRequestDTO;
 import at.pcgamingfreaks.model.dto.ThirdPartyAuthResponseDTO;
 import at.pcgamingfreaks.model.dto.ThirdPartyInfoResponseDTO;
+import at.pcgamingfreaks.model.exceptions.ThirdPartyAuthenticationException;
+import at.pcgamingfreaks.model.exceptions.ThirdPartyUnconfiguredException;
 import at.pcgamingfreaks.model.repo.UserRepository;
 import com.uwetrottmann.trakt5.TraktV2;
 import com.uwetrottmann.trakt5.entities.AccessToken;
@@ -20,6 +22,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import retrofit2.Response;
 
+import javax.naming.AuthenticationException;
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -34,25 +38,24 @@ public class TraktController implements ThirdPartyController {
     @PostMapping("auth/{username}")
     @PreAuthorize("authentication.principal.username == #username")
     @Validated
-    public ResponseEntity<ThirdPartyAuthResponseDTO> auth(
+    public void auth(
             @PathVariable String username,
             @RequestBody ThirdPartyAuthRequestDTO requestBody
     ) {
         log.info("Auth request for {} with code {}", username, requestBody.getCode());
 
-        if (!thirdPartyConfig.getTrakt().isValid()) return ResponseEntity.badRequest().build();
+        if (!thirdPartyConfig.getTrakt().isValid()) throw new ThirdPartyUnconfiguredException(ThirdPartyService.TRAKT);
 
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User does not exist"));
         if (user.getTraktConnection() != null) throw new RuntimeException("Already authenticated");
 
-        ThirdPartyAuthResponseDTO responseDto = new ThirdPartyAuthResponseDTO();
         try {
             TraktV2 trakt = new TraktV2(thirdPartyConfig.getTrakt().getClient().getKey(), thirdPartyConfig.getTrakt().getClient().getSecret(), thirdPartyConfig.getTrakt().getRedirectUrl());
             Response<AccessToken> response = trakt.exchangeCodeForAccessToken(requestBody.getCode());
-            if (!response.isSuccessful()) throw new RuntimeException("Trakt OAuth responded with empty body");
+            if (!response.isSuccessful()) throw new ThirdPartyAuthenticationException("Trakt OAuth responded with empty body");
 
             Response<com.uwetrottmann.trakt5.entities.User> traktUserInfo = trakt.accessToken(response.body().access_token).users().profile(UserSlug.ME, Extended.METADATA).execute();
-            if (!traktUserInfo.isSuccessful()) throw new RuntimeException("Trakt OAuth responded with empty username");
+            if (!traktUserInfo.isSuccessful()) throw new ThirdPartyAuthenticationException("Trakt OAuth responded with empty username");
 
             ThirdPartyConnection connection = new ThirdPartyConnection();
             connection.setService(ThirdPartyService.TRAKT);
@@ -62,11 +65,9 @@ public class TraktController implements ThirdPartyController {
             connection.setThirdpartyUserId(traktUserInfo.body().ids.slug);
             user.setTraktConnection(connection);
             userRepository.save(user);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            responseDto.setMessage(e.getMessage());
+        } catch (IOException e) {
+            throw new ThirdPartyAuthenticationException(e);
         }
-        return ResponseEntity.ok(responseDto);
     }
 
     @Override
