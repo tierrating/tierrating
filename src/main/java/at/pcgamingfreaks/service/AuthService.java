@@ -6,9 +6,9 @@ import at.pcgamingfreaks.model.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,15 +25,10 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-
     public LoginResponseDTO authenticate(String username, String password) {
         Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
-
+        User user = (User) auth.getPrincipal();
         String token = jwtService.create(user.getUsername());
-
         return new LoginResponseDTO(token);
     }
 
@@ -57,11 +52,11 @@ public class AuthService {
     }
 
     public LoginResponseDTO refreshToken(String token) {
-        if (jwtService.isTokenExpired(token)) throw new RuntimeException("Toke is invalid and can't be refreshed");
+        if (jwtService.isTokenExpired(token)) throw new CredentialsExpiredException("Token expired");
 
         String username = jwtService.extractUsername(token);
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+                .orElseThrow(() -> new UsernameNotFoundException("Invalid credentials"));
 
         String refreshedToken = jwtService.create(user.getUsername());
 
@@ -77,16 +72,11 @@ public class AuthService {
         userRepository.save(user.get());
     }
 
-    public AccountDeletionResponseDTO deleteAccount(AccountDeletionRequestDTO request) {
+    public void deleteAccount(AccountDeletionRequestDTO request) {
         Optional<User> user = userRepository.findByUsername(request.getUsername());
-        if (user.isEmpty()) return new AccountDeletionResponseDTO(false, "Unknown user");
+        if (user.isEmpty()) throw new UsernameNotFoundException("Username not found");
 
-        try {
-            userRepository.delete(user.get());
-            log.info("Deleted {} successfully", user.get().getUsername());
-            return new AccountDeletionResponseDTO(true, "");
-        } catch (Exception ex) {
-            return new AccountDeletionResponseDTO(false, "Deletion failed");
-        }
+        userRepository.delete(user.get());
+        log.info("Deleted {} successfully", user.get().getUsername());
     }
 }

@@ -21,13 +21,13 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO request) {
-        log.info("Login request from {}", request.getUsername());
+        log.debug("Login request from {}", request.getUsername());
         return ResponseEntity.ok(authService.authenticate(request.getUsername(), request.getPassword()));
     }
 
     @PostMapping("/signup")
     public ResponseEntity<SignupResponseDTO> signup(@RequestBody SignupRequestDTO request) {
-        log.info("Signup request from {}", request.getUsername());
+        log.debug("Signup request from {}", request.getUsername());
         return ResponseEntity.ok(authService.signup(request));
     }
 
@@ -39,14 +39,14 @@ public class AuthController {
     @PostMapping("/change-password")
     @PreAuthorize("authentication.principal.username == #request.username")
     public void changePassword(@RequestBody ChangePasswordRequestDTO request) {
-        log.info("Change password request from {}", request.getUsername());
+        log.debug("Change password request from {}", request.getUsername());
         authService.changePassword(request);
     }
 
     @PostMapping("/delete-account")
     @PreAuthorize("authentication.principal.username == #request.username")
     public void deleteAccount(@RequestBody AccountDeletionRequestDTO request) {
-        log.info("Account deletion request from {}", request.getUsername());
+        log.debug("Account deletion request from {}", request.getUsername());
         authService.deleteAccount(request);
     }
 }
