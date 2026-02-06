@@ -1,0 +1,32 @@
+spring:
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/tierrating
+    driver-class-name: org.postgresql.Driver
+    username: tierrating
+    password: testingPW
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+  sql:
+    init:
+      mode: never
+
+security:
+  jwt:
+    secret-key: 3cfa76ef14937c1c0ea519f8fc057a80fcd04a7420f8e8bcd0a7567c272e007b
+    expiration-time: 3600000
+
+services:
+  anilist:
+    client:
+      key: ${ANILIST_CLIENT_KEY:}
+      secret: ${ANILIST_CLIENT_SECRET:}
+    url: ${ANILIST_REDIRECT_URL:}
+  trakt:
+    client:
+      key: ${TRAKT_CLIENT_KEY:}
+      secret: ${TRAKT_CLIENT_SECRET:}
+    url: ${TRAKT_REDIRECT_URL:}
