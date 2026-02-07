@@ -7,9 +7,11 @@ import at.pcgamingfreaks.model.TierList;
 import at.pcgamingfreaks.model.auth.ThirdPartyConnection;
 import at.pcgamingfreaks.model.auth.User;
 import at.pcgamingfreaks.model.dto.TierDTO;
+import at.pcgamingfreaks.model.exceptions.ThirdPartyUnconfiguredException;
 import at.pcgamingfreaks.model.repo.TierListsRepository;
 import at.pcgamingfreaks.model.repo.TiersRepository;
 import at.pcgamingfreaks.model.repo.UserRepository;
+import at.pcgamingfreaks.service.TiersService;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -17,8 +19,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -27,7 +28,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -41,18 +43,20 @@ class TiersControllerTest {
     private TiersRepository tiersRepository;
 
     @InjectMocks
-    private TiersController tiersController;
+    private TiersService tiersService;
 
-    @ParameterizedTest
-    @MethodSource("notFound")
-    public void setTierListNotFound(Optional<User> user) {
-        when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
-        ResponseEntity<?> result = tiersController.setTierlist("testing", ThirdPartyService.ANILIST, ContentType.ANIME, new ArrayList<>());
-        assertEquals(HttpStatus.NOT_FOUND.value(), result.getStatusCode().value());
+    private static Stream<Arguments> expectedExceptions() {
+        return Stream.of(
+                Arguments.of(Optional.empty(), UsernameNotFoundException.class),
+                Arguments.of(Optional.of(new User()), ThirdPartyUnconfiguredException.class)
+        );
     }
 
-    private static Stream<Arguments> notFound() {
-        return Stream.of(Arguments.of(Optional.empty()), Arguments.of(Optional.of(new User())));
+    @ParameterizedTest
+    @MethodSource("expectedExceptions")
+    public void setTierListNotFound(Optional<User> user, Class<RuntimeException> expectedException) {
+        when(userRepository.findByUsername(any())).thenReturn(user);
+        assertThrows(expectedException, () -> tiersService.updateTierlist("testing", ThirdPartyService.ANILIST, ContentType.ANIME, new ArrayList<>()));
     }
 
     private static Stream<Arguments> settingTierlist() {
@@ -113,7 +117,7 @@ class TiersControllerTest {
         ArgumentCaptor<TierList> tierListCaptor = ArgumentCaptor.forClass(TierList.class);
         ArgumentCaptor<List<Tier>> tiersCaptor = ArgumentCaptor.forClass(List.class);
 
-        tiersController.setTierlist("test", ThirdPartyService.ANILIST, ContentType.ANIME, changedTiers);
+        tiersService.updateTierlist("test", ThirdPartyService.ANILIST, ContentType.ANIME, changedTiers);
 
         verify(tierListsRepository, times(1)).save(tierListCaptor.capture());
 

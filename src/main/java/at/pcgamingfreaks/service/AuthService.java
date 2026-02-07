@@ -56,7 +56,7 @@ public class AuthService {
 
         String username = jwtService.extractUsername(token);
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Invalid credentials"));
+                .orElseThrow(() -> new UsernameNotFoundException(username));
 
         String refreshedToken = jwtService.create(user.getUsername());
 
@@ -74,7 +74,7 @@ public class AuthService {
 
     public void deleteAccount(AccountDeletionRequestDTO request) {
         Optional<User> user = userRepository.findByUsername(request.getUsername());
-        if (user.isEmpty()) throw new UsernameNotFoundException("Username not found");
+        if (user.isEmpty()) throw new UsernameNotFoundException(request.getUsername());
 
         userRepository.delete(user.get());
         log.info("Deleted {} successfully", user.get().getUsername());

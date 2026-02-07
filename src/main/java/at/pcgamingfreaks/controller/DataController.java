@@ -5,7 +5,7 @@ import at.pcgamingfreaks.model.ThirdPartyService;
 import at.pcgamingfreaks.model.dto.UpdateScoreRequestDTO;
 import at.pcgamingfreaks.model.auth.User;
 import at.pcgamingfreaks.model.dto.ListEntryDTO;
-import at.pcgamingfreaks.model.dto.UpdateScoreResponseDTO;
+import at.pcgamingfreaks.model.exceptions.ThirdPartyUnconfiguredException;
 import at.pcgamingfreaks.model.repo.UserRepository;
 import at.pcgamingfreaks.service.dataprovider.DataProviderFactory;
 import at.pcgamingfreaks.service.dataprovider.DataProviderService;
@@ -14,10 +14,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 import static at.pcgamingfreaks.model.ThirdPartyService.hasUserConnection;
 
@@ -52,13 +52,9 @@ public class DataController {
      */
     @PostMapping("update")
     @PreAuthorize("authentication.principal.username == #request.username")
-    public ResponseEntity<UpdateScoreResponseDTO> updateData(@RequestBody UpdateScoreRequestDTO request) {
-        Optional<User> user = userRepository.findByUsername(request.getUsername());
-        if (user.isEmpty() || !hasUserConnection(user.get(), request.getService())) {
-            return ResponseEntity.notFound().build();
-        }
-
-        dataUpdateFactory.getProvider(request.getService(), request.getType()).updateData(request.getId(), request.getScore(), user.get());
-        return ResponseEntity.ok(UpdateScoreResponseDTO.success());
+    public void updateData(@RequestBody UpdateScoreRequestDTO request) {
+        User user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new UsernameNotFoundException(request.getUsername()));
+        if (!hasUserConnection(user, request.getService())) throw new ThirdPartyUnconfiguredException(request.getService());
+        dataUpdateFactory.getProvider(request.getService(), request.getType()).updateData(request.getId(), request.getScore(), user);
     }
 }

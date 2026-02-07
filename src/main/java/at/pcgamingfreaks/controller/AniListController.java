@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,8 +47,8 @@ public class AniListController implements ThirdPartyController {
 
         if (!thirdPartyConfig.getAnilist().isValid()) throw new ThirdPartyUnconfiguredException(ThirdPartyService.ANILIST);
 
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User does not exist"));
-        if (user.getAnilistConnection() != null) throw new RuntimeException("Already authenticated");
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        if (user.getAnilistConnection() != null) throw new ThirdPartyAuthenticationException("Already authenticated");
 
         try {
 

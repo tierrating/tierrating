@@ -5,7 +5,6 @@ import at.pcgamingfreaks.model.ThirdPartyService;
 import at.pcgamingfreaks.model.auth.ThirdPartyConnection;
 import at.pcgamingfreaks.model.auth.User;
 import at.pcgamingfreaks.model.dto.ThirdPartyAuthRequestDTO;
-import at.pcgamingfreaks.model.dto.ThirdPartyAuthResponseDTO;
 import at.pcgamingfreaks.model.dto.ThirdPartyInfoResponseDTO;
 import at.pcgamingfreaks.model.exceptions.ThirdPartyAuthenticationException;
 import at.pcgamingfreaks.model.exceptions.ThirdPartyUnconfiguredException;
@@ -18,11 +17,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import retrofit2.Response;
 
-import javax.naming.AuthenticationException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
@@ -46,8 +45,8 @@ public class TraktController implements ThirdPartyController {
 
         if (!thirdPartyConfig.getTrakt().isValid()) throw new ThirdPartyUnconfiguredException(ThirdPartyService.TRAKT);
 
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User does not exist"));
-        if (user.getTraktConnection() != null) throw new RuntimeException("Already authenticated");
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        if (user.getTraktConnection() != null) throw new ThirdPartyAuthenticationException("Already authenticated");
 
         try {
             TraktV2 trakt = new TraktV2(thirdPartyConfig.getTrakt().getClient().getKey(), thirdPartyConfig.getTrakt().getClient().getSecret(), thirdPartyConfig.getTrakt().getRedirectUrl());
