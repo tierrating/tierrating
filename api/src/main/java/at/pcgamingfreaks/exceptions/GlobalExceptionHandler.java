@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(UsernameNotFoundException.class)
 	public ResponseEntity<ErrorResponseDTO> handleUsernameNotFoundException(UsernameNotFoundException ex) {
 		log.info("User '{}' not found", ex.getMessage());
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponseDTO("User not found"));
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDTO("User not found"));
 	}
 
 	@ExceptionHandler(AuthenticationException.class)
@@ -53,6 +53,24 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponseDTO> handleThirdPartySyncException(ThirdPartySyncException ex) {
 		log.warn("Third-party sync error: {}", ex.getMessage());
 		return ResponseEntity.internalServerError().body(new ErrorResponseDTO("Third-party synchronization failed"));
+	}
+
+	@ExceptionHandler(MediaNotVisibleException.class)
+	public ResponseEntity<ErrorResponseDTO> handleMediaNotVisibleException(MediaNotVisibleException ex) {
+		log.info(ex.getMessage());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDTO("Not found"));
+	}
+
+	@ExceptionHandler(MediaSyncAlreadyQueued.class)
+	public ResponseEntity<ErrorResponseDTO> handleMediaSyncAlreadyQueued(MediaSyncAlreadyQueued ex) {
+		log.info(ex.getMessage());
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponseDTO("A sync for this media source is already queued"));
+	}
+
+	@ExceptionHandler(MediaSourceNotConnectedException.class)
+	public ResponseEntity<ErrorResponseDTO> handleMediaSourceNotConnectedException(MediaSourceNotConnectedException ex) {
+		log.warn(ex.getMessage());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponseDTO("Media source not connected"));
 	}
 
 	@ExceptionHandler(WebClientResponseException.class)

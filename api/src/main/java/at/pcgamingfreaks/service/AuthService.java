@@ -26,7 +26,13 @@ public class AuthService {
 	private final JwtService jwtService;
 
 	public LoginResponseDTO authenticate(String username, String password) {
-		User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+		User user;
+		try {
+			user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+		} catch (UsernameNotFoundException e) {
+			// do not leak whether the username exists on login
+			throw new BadCredentialsException("Invalid credentials");
+		}
 		if (!passwordEncoder.matches(password, user.getPassword()))
 			throw new BadCredentialsException("Invalid credentials");
 		String token = jwtService.generateToken(new UserPrincipal(user.getId(), user.getUsername()));
@@ -54,7 +60,7 @@ public class AuthService {
 	}
 
 	public LoginResponseDTO refreshToken(String token) {
-		jwtService.isTokenValid(token);
+		if (!jwtService.isTokenValid(token)) throw new BadCredentialsException("Invalid token");
 
 		UserPrincipal userPrincipal = jwtService.extractPrincipal(token);
 		User user = userRepository.findById(userPrincipal.getId())

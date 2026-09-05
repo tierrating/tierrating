@@ -33,7 +33,7 @@ public class MediaSyncJob implements Runnable {
 					System.currentTimeMillis() - startingTime);
 		} catch (Exception e) {
 			syncJobRepository.completeJob(syncJob.getId(), SyncStatus.FAILED, LocalDateTime.now());
-			log.debug("Sync failed for {} {} {} after {}ms",
+			log.error("Sync failed for {} {} {} after {}ms",
 					syncJob.getUser().getUsername(), syncJob.getMediaSource(), syncJob.getMediaType(),
 					System.currentTimeMillis() - startingTime, e);
 		}

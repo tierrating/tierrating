@@ -19,6 +19,9 @@ const DEFAULT_COLORS = [
 	"#FF7FBF", // F - Pink
 ];
 
+// Tier with a client-side id used for row identity while editing; the id is stripped when saving
+export type EditableTier = Tier & { id: string };
+
 export function TierConfigModalBody({
 	tiers,
 	setTiers,
@@ -26,8 +29,8 @@ export function TierConfigModalBody({
 	isValidating,
 	isMutating,
 }: {
-	tiers: Tier[];
-	setTiers: (tier: Tier[]) => void;
+	tiers: EditableTier[];
+	setTiers: (tier: EditableTier[]) => void;
 	decimals: string;
 	isValidating: boolean;
 	isMutating: boolean;

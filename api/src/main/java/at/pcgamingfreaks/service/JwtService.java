@@ -34,10 +34,9 @@ public class JwtService {
 	}
 
 	public UserPrincipal extractPrincipal(String token) {
-		DecodedJWT jwt = JWT.decode(token);
+		DecodedJWT jwt = JWT.require(algorithm).build().verify(token);
 		Long id = jwt.getClaim("user_id").asLong();
 		String username = jwt.getSubject();
-//		String role = jwt.getClaim("role").asString().replace("ROLE_", "");
 
 		return new UserPrincipal(id, username);
 	}

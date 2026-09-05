@@ -5,10 +5,12 @@ import at.pcgamingfreaks.model.enums.MediaSource;
 import at.pcgamingfreaks.model.dto.TierDTO;
 import at.pcgamingfreaks.model.dto.TiersUpdateRequest;
 import at.pcgamingfreaks.service.TierlistService;
+import at.pcgamingfreaks.model.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +26,9 @@ public class TierlistController {
 	 * @return list of tier grades sorted by score
 	 */
 	@GetMapping("{username}/{service}/{type}")
-	public ResponseEntity<List<TierDTO>> getTierlist(@PathVariable String username, @PathVariable MediaSource service, @PathVariable MediaType type) {
-		return ResponseEntity.ok(tierlistService.getTierlist(username, service, type));
+	public ResponseEntity<List<TierDTO>> getTierlist(@AuthenticationPrincipal UserPrincipal requester,
+	                                                @PathVariable String username, @PathVariable MediaSource service, @PathVariable MediaType type) {
+		return ResponseEntity.ok(tierlistService.getTierlist(username, service, type, requester == null ? null : requester.getUsername()));
 	}
 
 	@PutMapping("{username}/{service}/{type}")

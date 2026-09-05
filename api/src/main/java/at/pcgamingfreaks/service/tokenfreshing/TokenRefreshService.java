@@ -22,8 +22,12 @@ public class TokenRefreshService {
 		List<User> users = userRepository.findAll();
 
 		for (User user : users) {
-			if (user.getConnections().get(MediaSource.TRAKT) != null && traktTokenRefresher.isValid())
-				traktTokenRefresher.refresh(user);
+			try {
+				if (user.getConnections().get(MediaSource.TRAKT) != null && traktTokenRefresher.isValid())
+					traktTokenRefresher.refresh(user);
+			} catch (Exception e) {
+				log.error("Failed to refresh trakt token for user {}", user.getUsername(), e);
+			}
 		}
 		log.info("Refreshed tokens");
 	}

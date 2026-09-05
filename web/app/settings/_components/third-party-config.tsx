@@ -32,13 +32,14 @@ export default function ThirdPartyConfig() {
 
 	if (isValidating) return <LoadingDiv className={"min-h-30"} />;
 
-	if (userError || servicesError) return (
-		<Alert variant="destructive" className="max-w-md">
-			<AlertCircleIcon />
-			<AlertTitle>Error occured</AlertTitle>
-			<AlertDescription>Can&#39;t load configured third-party services. Please try again later.</AlertDescription>
-		</Alert>
-	);
+	if (userError || servicesError)
+		return (
+			<Alert variant="destructive" className="max-w-md">
+				<AlertCircleIcon />
+				<AlertTitle>Error occured</AlertTitle>
+				<AlertDescription>Can&#39;t load configured third-party services. Please try again later.</AlertDescription>
+			</Alert>
+		);
 
 	const connectedServices: ThirdPartyServiceConfig[] = userData!.connectedServices.map((service) => getServiceConfig(service)!);
 	const availableServices: ThirdPartyServiceConfig[] = services!

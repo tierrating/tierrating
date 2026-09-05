@@ -8,7 +8,8 @@ import { ArrowLeftFromLine, ArrowRightFromLine, ArrowDownFromLine, ArrowUpFromLi
 import { cn } from "@/lib/utils";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { useAuth } from "@/contexts/auth-context";
-import { useThirdPartyDataPull, useTierlistEntries } from "@/lib/services/media-service";
+import { useTierlistEntries } from "@/lib/services/media-service";
+import { runSync } from "@/lib/services/sync-service";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
@@ -28,30 +29,21 @@ export default function TierListPage({
 	const { user, token } = useAuth();
 	const [isFullWidth, setIsFullWidth] = useState<boolean>(false);
 	const [isPullRunning, setIsPullRunning] = useState<boolean>(false);
-	const [isPushRunning, setIsPushRunning] = useState<boolean>(false);
 
 	const modificationEnabled: boolean = user == username;
 
 	const { mutate: entriesMutate } = useTierlistEntries(username, service, type, token!);
-	const { trigger: pullThirdPartyData, error, isMutating } = useThirdPartyDataPull(username, service, type, token!);
 
 	const pullUpdate = () => {
 		setIsPullRunning(true);
-		pullThirdPartyData()
+		runSync(service, type, token!)
 			.then(() => entriesMutate())
 			.catch((error) => toast.error(error.message))
 			.finally(() => setIsPullRunning(false));
 	};
 
-	const pushUpdate = () => {
-		setIsPushRunning(true);
-		setTimeout(() => setIsPushRunning(false), 3000);
-	};
-
 	const pullText = isPullRunning ? "Pulling" : "Pull";
 	const PullIcon = isPullRunning ? Spinner : ArrowDownFromLine;
-	const pushText = isPushRunning ? "Pushing" : "Push";
-	const PushIcon = isPushRunning ? Spinner : ArrowUpFromLine;
 
 	return (
 		<div className={cn("max-w-full px-4")}>
@@ -63,12 +55,12 @@ export default function TierListPage({
 							<ButtonGroup>
 								<Tooltip>
 									<TooltipTrigger asChild>
-										<Button variant="outline" disabled={isPullRunning} onClick={pushUpdate} aria-label={pushText}>
-											<PushIcon data-icon="inline-start" />
-											{pushText}
+										<Button variant="outline" disabled aria-label="Push">
+											<ArrowUpFromLine data-icon="inline-start" />
+											Push
 										</Button>
 									</TooltipTrigger>
-									<TooltipContent>Pushing data to third-party service overwriting external scores.</TooltipContent>
+									<TooltipContent>Pushing data to third-party services is not available yet.</TooltipContent>
 								</Tooltip>
 
 								<Tooltip>

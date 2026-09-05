@@ -7,7 +7,6 @@ RUN adduser --no-create-home --disabled-password -G tierrating --uid 1234 tierra
 
 RUN mkdir /app && chown -R tierrating:tierrating /app
 COPY --chown=tierrating:tierrating target/tierrating-*.jar /app/tierrating.jar
-COPY --chown=tierrating:tierrating src/main/resources/application.yml /app
 
 USER tierrating
 

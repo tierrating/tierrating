@@ -2,9 +2,9 @@ package at.pcgamingfreaks.controller;
 
 import at.pcgamingfreaks.mapper.UserDtoMapper;
 import at.pcgamingfreaks.model.enums.MediaSource;
+import at.pcgamingfreaks.model.db.MediaSourceConnection;
 import at.pcgamingfreaks.model.db.User;
 import at.pcgamingfreaks.model.dto.UserDTO;
-import at.pcgamingfreaks.model.repo.MediaSourceConnectionRepository;
 import at.pcgamingfreaks.model.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 public class UserController {
 	private final UserRepository userRepository;
-	private final MediaSourceConnectionRepository mediaSourceConnectionRepository;
 
 	@GetMapping("{username}")
 	public ResponseEntity<UserDTO> user(@PathVariable String username) {
@@ -32,8 +31,10 @@ public class UserController {
 	@PreAuthorize("authentication.principal.username == #username")
 	public void removeThirdPartyService(@PathVariable String username, @PathVariable MediaSource service) {
 		User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
-		mediaSourceConnectionRepository.deleteById(user.getConnections().get(service).getId());
-		user.getConnections().put(service, null);
+		MediaSourceConnection connection = user.getConnections().get(service);
+		if (connection == null) return; // idempotent: nothing to remove
+
+		user.getConnections().remove(service); // triggers orphan removal on save
 		userRepository.save(user);
 	}
 

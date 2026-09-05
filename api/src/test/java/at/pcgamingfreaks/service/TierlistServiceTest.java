@@ -8,6 +8,7 @@ import at.pcgamingfreaks.model.dto.TierDTO;
 import at.pcgamingfreaks.model.enums.MediaSource;
 import at.pcgamingfreaks.model.enums.MediaType;
 import at.pcgamingfreaks.exceptions.MediaSourceUnconfiguredException;
+import at.pcgamingfreaks.exceptions.MediaNotVisibleException;
 import at.pcgamingfreaks.model.repo.TierlistRepository;
 import at.pcgamingfreaks.model.repo.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -39,20 +40,34 @@ class TierlistServiceTest {
 	@Mock
 	DefaultTierlistProvider defaultTierlistProvider;
 
+	@Mock
+	MediaVisibilityService mediaVisibilityService;
+
 	@InjectMocks
 	TierlistService underTest;
 
 	@Test
 	void getTierlist_userNotFound() {
 		when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
-		assertThrows(UsernameNotFoundException.class, () -> underTest.getTierlist("test", null, null));
+		assertThrows(UsernameNotFoundException.class, () -> underTest.getTierlist("test", null, null, "test"));
 	}
 
 	@Test
 	void getTierlist_userHasNoConnection() {
 		User user = new User();
 		when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
-		assertThrows(MediaSourceUnconfiguredException.class, () -> underTest.updateTierlist("test", MediaSource.ANILIST, null, List.of()));
+		assertThrows(MediaSourceUnconfiguredException.class, () -> underTest.getTierlist("test", MediaSource.ANILIST, MediaType.ANIME, "test"));
+	}
+
+	@Test
+	void getTierlist_notVisibleForOtherUsers() {
+		User user = new User();
+		user.getConnections().put(MediaSource.ANILIST, new MediaSourceConnection());
+
+		when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
+		when(mediaVisibilityService.isViewableBy(user, "someone-else", MediaSource.ANILIST, MediaType.ANIME)).thenReturn(false);
+
+		assertThrows(MediaNotVisibleException.class, () -> underTest.getTierlist("test", MediaSource.ANILIST, MediaType.ANIME, "someone-else"));
 	}
 
 	@Test
@@ -62,10 +77,11 @@ class TierlistServiceTest {
 		List<Tier> defaultTiers = List.of(new Tier("S", "#000000", 10.0, 10.0));
 
 		when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
+		when(mediaVisibilityService.isViewableBy(user, "test", MediaSource.ANILIST, MediaType.ANIME)).thenReturn(true);
 		when(tierlistRepository.findByUserAndServiceAndType(user, MediaSource.ANILIST, MediaType.ANIME)).thenReturn(Optional.empty());
 		when(defaultTierlistProvider.getDefaultTierlist(MediaSource.ANILIST, MediaType.ANIME)).thenReturn(defaultTiers);
 
-		List<TierDTO> result = underTest.getTierlist("test", MediaSource.ANILIST, MediaType.ANIME);
+		List<TierDTO> result = underTest.getTierlist("test", MediaSource.ANILIST, MediaType.ANIME, "test");
 
 		assertEquals(List.of(new TierDTO("S", "#000000", 10.0, 10.0)), result);
 	}
@@ -79,9 +95,10 @@ class TierlistServiceTest {
 		tierlist.setTiers(userSpecificTiers);
 
 		when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
+		when(mediaVisibilityService.isViewableBy(user, "test", MediaSource.ANILIST, MediaType.ANIME)).thenReturn(true);
 		when(tierlistRepository.findByUserAndServiceAndType(user, MediaSource.ANILIST, MediaType.ANIME)).thenReturn(Optional.of(tierlist));
 
-		List<TierDTO> result = underTest.getTierlist("test", MediaSource.ANILIST, MediaType.ANIME);
+		List<TierDTO> result = underTest.getTierlist("test", MediaSource.ANILIST, MediaType.ANIME, "test");
 
 		assertEquals(List.of(new TierDTO("S", "#000000", 10.0, 10.0)), result);
 	}
@@ -90,7 +107,7 @@ class TierlistServiceTest {
 	void updateTierlist_userHasNoConnection() {
 		User user = new User();
 		when(userRepository.findByUsername(any())).thenReturn(Optional.of(user));
-		assertThrows(MediaSourceUnconfiguredException.class, () -> underTest.getTierlist("test", MediaSource.ANILIST, null));
+		assertThrows(MediaSourceUnconfiguredException.class, () -> underTest.updateTierlist("test", MediaSource.ANILIST, null, List.of()));
 	}
 
 	@Test

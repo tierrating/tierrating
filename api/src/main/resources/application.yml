@@ -22,9 +22,9 @@ spring:
 
 security:
   jwt:
-    # JWT secret key - MUST be changed in production!
-    # Use a strong, random string of at least 256 bits
-    secret-key: ${SECRET_KEY:please-change-this-secret-key-in-production}
+    # JWT secret key - no default on purpose: the application must not start with a known secret.
+    # Use a strong, random string of at least 256 bits.
+    secret-key: ${SECRET_KEY}
     # Token expiration in minutes (default: 60 minutes = 1 hour)
     # Consider implementing refresh token rotation for better security:
     # - Short-lived access tokens (15-30 min) + long-lived refresh tokens

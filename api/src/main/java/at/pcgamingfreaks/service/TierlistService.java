@@ -8,6 +8,7 @@ import at.pcgamingfreaks.model.dto.TierDTO;
 import at.pcgamingfreaks.model.enums.MediaSource;
 import at.pcgamingfreaks.model.enums.MediaType;
 import at.pcgamingfreaks.exceptions.MediaSourceUnconfiguredException;
+import at.pcgamingfreaks.exceptions.MediaNotVisibleException;
 import at.pcgamingfreaks.model.repo.TierlistRepository;
 import at.pcgamingfreaks.model.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +26,12 @@ public class TierlistService {
 	private final UserRepository userRepository;
 	private final TierlistRepository tierlistRepository;
 	private final DefaultTierlistProvider defaultTierlistProvider;
+	private final MediaVisibilityService mediaVisibilityService;
 
-	public List<TierDTO> getTierlist(String username, MediaSource source, MediaType type) {
+	public List<TierDTO> getTierlist(String username, MediaSource source, MediaType type, String requesterUsername) {
 		User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
 		if (!user.hasMediaSourceConnection(source)) throw new MediaSourceUnconfiguredException(source);
+		if (!mediaVisibilityService.isViewableBy(user, requesterUsername, source, type)) throw new MediaNotVisibleException(username);
 
 		Optional<Tierlist> tierlist = tierlistRepository.findByUserAndServiceAndType(user, source, type);
 		List<Tier> tiers = tierlist.isPresent() ? tierlist.get().getTiers() : defaultTierlistProvider.getDefaultTierlist(source, type);

@@ -4,12 +4,11 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown, Settings } from "lucide-react";
-import { Tier } from "@/types/types";
 import { useAuth } from "@/contexts/auth-context";
 import { getDefaultTiers } from "@/lib/config/default-tiers";
 import { useTiersOnDemand, useTiersUpdate } from "@/lib/services/tierlist-service";
 import { toast } from "sonner";
-import { TierConfigModalBody } from "@/app/settings/_components/tier-config-modal-body";
+import { EditableTier, TierConfigModalBody } from "@/app/settings/_components/tier-config-modal-body";
 
 interface TierConfigModalProps {
 	service: string;
@@ -28,17 +27,17 @@ export default function TierConfigModal({ service, type, username, decimals }: T
 		mutate: refreshTiers,
 	} = useTiersOnDemand(!isOpen, username, service, type, token!);
 
-	const [tiers, setTiers] = useState<Tier[]>(tiersData?.length ? tiersData : getDefaultTiers());
+	const [tiers, setTiers] = useState<EditableTier[]>([]);
 	useEffect(() => {
 		// eslint-disable-next-line react-hooks/set-state-in-effect
-		setTiers(tiersData?.length ? tiersData : getDefaultTiers());
+		setTiers((tiersData?.length ? tiersData : getDefaultTiers()).map((tier) => ({ ...tier, id: crypto.randomUUID() })));
 	}, [tiersData]);
 
 	const { trigger: updateTiers, error, isMutating } = useTiersUpdate(username, service, type, token!);
 
 	const handleSave = () => {
 		const sortedTiers = [...tiers].sort((a, b) => b.score - a.score);
-		updateTiers({ tiers: sortedTiers }).catch((error) => {
+		updateTiers({ tiers: sortedTiers.map(({ id: _id, ...tier }) => tier) }).catch((error) => {
 			toast.error("Something went wrong while saving tiers.");
 		});
 		setIsOpen(false);
@@ -75,7 +74,10 @@ export default function TierConfigModal({ service, type, username, decimals }: T
 					isMutating={isMutating}
 				/>
 				<DialogFooter className="flex gap-2">
-					<Button variant="secondary" onClick={() => setTiers(getDefaultTiers())}>
+					<Button
+						variant="secondary"
+						onClick={() => setTiers(getDefaultTiers().map((tier) => ({ ...tier, id: crypto.randomUUID() })))}
+					>
 						Restore defaults
 					</Button>
 					<Button variant="outline" onClick={() => setIsOpen(false)}>

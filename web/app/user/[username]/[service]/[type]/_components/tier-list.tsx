@@ -40,7 +40,13 @@ export default function TierList({
 	const entries = useMemo(() => entriesData ?? [], [entriesData]);
 
 	const tiersByName = useMemo(() => groupBySingle(tiers, (tier) => tier.name), [tiers]);
-	const entriesById = useMemo(() => groupBySingle(entries, (entry) => entry.id), [entries]);
+	const [entriesById, setEntriesById] = useState<Map<string, TierlistEntry>>(new Map());
+
+	useEffect(() => {
+		queueMicrotask(() => {
+			setEntriesById(groupBySingle(entries, (entry) => entry.id));
+		});
+	}, [entries]);
 
 	const initialEntriesByTierName = useMemo(() => assignTiersAndGroupEntriesByTier(tiers, entries), [tiers, entries]);
 	const [entriesByTierName, setEntriesByTierName] = useState<Map<string, TierlistEntry[]>>(new Map()); // mutated by user
@@ -80,13 +86,16 @@ export default function TierList({
 	};
 
 	const updateEntry = (entryToChange: TierlistEntry, targetTier: Tier, sourceTier: Tier) => {
-		console.debug(`${entryToChange.title}: ${sourceTier.name} -> ${targetTier.name}`);
-
 		const updatedEntry = {
 			...entryToChange,
 			tier: targetTier,
 			score: targetTier.adjustedScore,
 		};
+
+		if (sourceTier.name !== targetTier.name) {
+			// update element to avoid stale drag overlay data
+			setEntriesById((prev) => new Map(prev).set(updatedEntry.id, updatedEntry));
+		}
 
 		setEntriesByTierName((prevMap) => {
 			const newMap = new Map(prevMap);
@@ -97,8 +106,6 @@ export default function TierList({
 				// remove entryToChange from its current tier
 				const updatedEntries = [...newMap.get(sourceTier.name)!.filter((entry) => entry.id !== entryToChange.id)];
 				newMap.set(sourceTier.name, updatedEntries);
-				// update element to avoid stale data
-				entriesById.set(updatedEntry.id, updatedEntry);
 			}
 			return newMap;
 		});

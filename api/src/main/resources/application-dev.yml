@@ -17,7 +17,7 @@ spring:
 security:
   jwt:
     secret-key: ${JWT_SECRET_KEY:dev-secret-key-change-in-production}
-    expiration-time: ${JWT_EXPIRATION_TIME:3600000}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}
 
 server:
   servlet:

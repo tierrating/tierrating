@@ -7,7 +7,8 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       SECRET_KEY: ${SECRET_KEY:?secret key can't be empty}
       TOKEN_EXPIRATION: ${TOKEN_EXPIRATION:-80}
@@ -35,10 +36,14 @@ services:
   db:
     image: postgres
     restart: unless-stopped
-    ports:
-      - 5432
     volumes:
       - ./data:/var/lib/postgresql
     environment:
       POSTGRES_USER: ${DB_USERNAME:-tierrating}
       POSTGRES_PASSWORD: ${DB_PASSWORD:?database password can't be empty}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-tierrating} -d tierrating"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { extractJwtData } from "@/lib/auth/jwt-decoder";
 import { useRefreshToken } from "@/lib/services/auth-service";
@@ -37,7 +37,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		localStorage.setItem("authToken", newToken);
 		setToken(newToken);
 		const extracted = extractJwtData(newToken);
-		if (extracted) setUser(extracted.username);
+		if (extracted) {
+			setUser(extracted.username);
+			setExpiration(extracted.expiration);
+			setIsExpired(extracted.isExpired);
+		}
 		setIsAuthenticated(true);
 	}, []);
 
@@ -72,24 +76,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			setExpiration(decodedJwt.expiration);
 			setIsAuthenticated(true);
 
-			if (
-				!decodedJwt.isExpired &&
-				decodedJwt.expiration &&
-				decodedJwt.expiration.getTime() - new Date().getTime() - 15 * 60 * 1000 <= 0
-			) {
-				refreshToken({ token: storedToken })
-					.then((response) => {
-						login(response.token);
-					})
-					.catch((error) => {
-						toast.error("Error refreshing token");
-					});
-			}
-
 			setLoading(false);
 		};
 		checkAuth();
 	}, [login, logout, refreshToken]);
+
+	// Proactively refresh the token while the page is open so long sessions don't break
+	const refreshInFlight = useRef(false);
+	useEffect(() => {
+		if (!isAuthenticated || !token || !expiration) return;
+
+		const refreshIfExpiringSoon = () => {
+			if (refreshInFlight.current) return;
+			if (expiration.getTime() - Date.now() > 15 * 60 * 1000) return;
+
+			refreshInFlight.current = true;
+			refreshToken({ token })
+				.then((response) => {
+					refreshInFlight.current = false;
+					login(response.token);
+				})
+				.catch(() => {
+					refreshInFlight.current = false;
+					toast.error("Error refreshing token");
+				});
+		};
+
+		refreshIfExpiringSoon();
+		const interval = setInterval(refreshIfExpiringSoon, 60 * 1000);
+		return () => clearInterval(interval);
+	}, [isAuthenticated, token, expiration, refreshToken, login]);
 
 	return (
 		<AuthContext.Provider value={{ token, user, isAuthenticated, isLoading, isExpired, expiration, login, logout }}>

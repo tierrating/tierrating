@@ -29,7 +29,7 @@ public class MediaSyncPersistenceService {
 	private final SteamMediaEntryRepository steamMediaEntryRepository;
 
 	@Transactional
-	protected <E extends MediaEntry> void reconcile(Long userId, MediaSource source,
+	public <E extends MediaEntry> void reconcile(Long userId, MediaSource source,
 	                                                RemoteMediaClient<E> remoteMediaClient,
 	                                                List<RemoteSyncResult<E>> remoteEntries) {
 		User userProxy = userRepository.getReferenceById(userId);

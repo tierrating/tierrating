@@ -1,5 +1,6 @@
 package at.pcgamingfreaks.controller;
 
+import at.pcgamingfreaks.model.UserPrincipal;
 import at.pcgamingfreaks.model.dto.MediaEntryDTO;
 import at.pcgamingfreaks.model.enums.MediaType;
 import at.pcgamingfreaks.model.enums.MediaSource;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,10 +30,11 @@ public class MediaController {
 	 * @return mapped third-party data ordered by score descending
 	 */
 	@GetMapping("{username}/{service}/{type}")
-	public ResponseEntity<List<MediaEntryDTO>> fetch(@PathVariable String username,
+	public ResponseEntity<List<MediaEntryDTO>> fetch(@AuthenticationPrincipal UserPrincipal requester,
+	                                                 @PathVariable String username,
 	                                                 @PathVariable MediaSource service,
 	                                                 @PathVariable MediaType type) {
-		return ResponseEntity.ok(mediaLibraryService.fetchLocal(username, service, type));
+		return ResponseEntity.ok(mediaLibraryService.fetchLocal(username, service, type, requester == null ? null : requester.getUsername()));
 	}
 
 	/**

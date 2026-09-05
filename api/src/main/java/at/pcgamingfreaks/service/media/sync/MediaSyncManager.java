@@ -8,6 +8,7 @@ import at.pcgamingfreaks.exceptions.MediaSourceNotConnectedException;
 import at.pcgamingfreaks.exceptions.MediaSyncAlreadyQueued;
 import at.pcgamingfreaks.model.repo.SyncJobRepository;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -39,6 +40,11 @@ public class MediaSyncManager {
 		});
 	}
 
+	@PreDestroy
+	public void shutdown() {
+		executor.shutdownNow();
+	}
+
 	public void enqueueSync(User user, MediaSource source, MediaType type) {
 		Optional<SyncJob> runningJob = syncJobRepository.findActiveSyncByUserAndSourceAndTypeAndStatus(user, source, type, List.of(IN_PROGRESS, PENDING));
 		if (runningJob.isPresent()) {
@@ -46,7 +52,7 @@ public class MediaSyncManager {
 			throw new MediaSyncAlreadyQueued(user.getUsername(), source, type);
 		}
 
-		if (!user.getConnections().containsKey(source)) {
+		if (!user.hasMediaSourceConnection(source)) {
 			throw new MediaSourceNotConnectedException(user.getUsername(), source);
 		}
 
